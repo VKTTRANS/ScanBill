@@ -138,6 +138,9 @@ label {
     background-color: var(--primary) !important;
 }
 
+/* =========================================
+   ส่วนแสดงข้อมูลอ้างอิง
+   ========================================= */
 .data-section { 
     margin-bottom: 30px; 
     border: 1px solid var(--border-light); 
@@ -185,6 +188,9 @@ label {
     box-shadow: var(--shadow-sm);
 }
 
+/* =========================================
+   ส่วนอัปโหลดและปุ่ม
+   ========================================= */
 .upload-container {
     border: 2px dashed #bcccff; 
     padding: 25px 20px; 
