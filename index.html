@@ -61,15 +61,15 @@
         }
 
         .warning-note {
-            background-color: #f1f3f9;
-            color: #3f51b5;
+            background-color: #f8f9fc;
+            color: #2c3e50;
             padding: 12px 15px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 13px;
             text-align: left;
             margin-bottom: 25px;
-            border: 1px solid #e1e4ed;
-            line-height: 1.5;
+            border: 1px solid #dcdde1;
+            line-height: 1.6;
         }
 
         .form-group { margin-bottom: 25px; }
@@ -250,7 +250,6 @@
 
         input[type="file"] { display: none; }
         
-        /* สไตล์สำหรับกล่องแสดงรูปภาพหลายรูป */
         #previewContainer { 
             display: flex;
             flex-wrap: wrap;
@@ -318,7 +317,8 @@
     </div>
 
     <div class="warning-note">
-        <strong>⚠️ กฎเหล็กการตรวจสอบ:</strong> หากคำที่ขาดหายไปบนเอกสารมี <strong>"ตัวเลข"</strong> (เช่น บ้านเลขที่, รหัสสาขาไม่ตรง) ระบบจะบังคับให้ตรวจสอบข้อมูลด้วยตาเปล่าทันที
+        <strong>⚠️ ระบบตรวจสอบอัจฉริยะ:</strong> ระวังตัวอักษรที่คล้ายกัน เช่น <strong>0 (ศูนย์)/O (โอ)</strong> และ <strong>1/I/l</strong><br>
+        <span style="color:#d35400; font-weight:600;">📌 กฎเหล็ก:</span> หาก "ตัวเลข" (เช่น บ้านเลขที่, รหัสไปรษณีย์) บนบิลไม่ตรงกับในระบบแม้แต่ตัวเดียว ระบบจะปรับให้คะแนนตกทันที!
     </div>
     
     <div class="form-group">
@@ -341,7 +341,7 @@
     </div>
 
     <div class="upload-container">
-        <p class="upload-header">2. นำเข้าเอกสารเพื่อตรวจสอบ (รองรับหลายใบพร้อมกัน)</p>
+        <p class="upload-header">2. นำเข้าเอกสารเพื่อตรวจสอบ (อัปโหลดหลายใบพร้อมกันได้)</p>
         
         <div class="action-buttons">
             <div class="action-btn" onclick="document.getElementById('cameraInput').click()">
@@ -570,44 +570,49 @@
                 </div>`;
             }
 
-            // ฟังก์ชันวิเคราะห์คำ และตรวจสอบ "กฎเหล็กเรื่องตัวเลข"
+            // ฟังก์ชันวิเคราะห์คำ และตรวจสอบ "กฎเหล็กเรื่องตัวเลข" (แยกเช็คตัวเลขและตัวอักษร)
             function analyzeMatch(dbText, ocrText) {
                 if (!dbText) return { score: 1.0, missingWords: [] };
                 
-                let normDb = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1il]/g, '1').replace(/[^a-z0-9ก-๙]/g, ' ');
-                let words = normDb.split(/\s+/).filter(w => w.length > 1);
-                
-                let ocrNoSpaces = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1il]/g, '1').replace(/[^a-z0-9ก-๙]/g, '');
-                
-                if (words.length === 0) {
-                    let strictDb = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-                    return { 
-                        score: ocrNoSpaces.includes(strictDb) ? 1.0 : 0, 
-                        missingWords: ocrNoSpaces.includes(strictDb) ? [] : [dbText] 
-                    };
-                }
-
-                let matchCount = 0;
                 let missing = [];
-                let originalWords = dbText.replace(/[^a-zA-Z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
-                let hasNumberMismatch = false; // ตัวแปรเช็คกฎเหล็ก
+                let matchCount = 0;
+                let hasNumberMismatch = false;
 
-                words.forEach((w, index) => {
-                    if (ocrNoSpaces.includes(w)) {
+                // 1. หมวดตัวเลข (Numbers only)
+                const dbNumNormalized = dbText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
+                const dbNumbers = dbNumNormalized.match(/\d+/g) || [];
+                
+                const ocrNumNormalized = ocrText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
+                const ocrNumbers = ocrNumNormalized.match(/\d+/g) || [];
+                
+                dbNumbers.forEach(num => {
+                    if (ocrNumbers.includes(num)) {
                         matchCount++;
                     } else {
-                        let origWord = originalWords[index] || w;
-                        missing.push(origWord);
-                        // ถ้าคำที่หายไปมีตัวเลขผสมอยู่ ถือเป็น Critical Mismatch
-                        if (/\d/.test(origWord)) {
-                            hasNumberMismatch = true;
-                        }
+                        missing.push(num);
+                        hasNumberMismatch = true; // กฎเหล็ก: ตัวเลขหาย บังคับตก!
                     }
                 });
 
-                let finalScore = matchCount / words.length;
+                // 2. หมวดตัวอักษร (Letters only)
+                // แปลงตัวเลขให้เป็นช่องว่าง เพื่อตัดแบ่งเฉพาะคำที่เป็นตัวอักษร
+                const dbLettersNorm = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, ' ');
+                const dbWords = dbLettersNorm.split(/\s+/).filter(w => w.length > 1);
+                
+                const ocrLettersNorm = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, '');
+                
+                dbWords.forEach(w => {
+                    if (ocrLettersNorm.includes(w)) {
+                        matchCount++;
+                    } else {
+                        missing.push(w.toUpperCase());
+                    }
+                });
 
-                // กฎเหล็ก: ถ้าตัวเลข (บ้านเลขที่, รหัสไปรษณีย์) หายไป บังคับคะแนนตกทันที
+                let totalItems = dbNumbers.length + dbWords.length;
+                let finalScore = totalItems === 0 ? 1.0 : matchCount / totalItems;
+
+                // ใช้งานกฎเหล็ก: ถ้าตัวเลขหายไป บังคับให้คะแนนไม่ถึง 80% (ตกทันที)
                 if (hasNumberMismatch && finalScore >= 0.8) {
                     finalScore = 0.79;
                 }
@@ -691,8 +696,7 @@
                     icon: 'info',
                     title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
                     html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>
-                           ${missingWordsHtml}
-                           <div style="font-size: 14px; margin-top:10px; color:#555;">🔍 โปรดเทียบคำที่หายไปกับเอกสารจริงด้วยตาเปล่าอีกครั้ง</div>` + amountWarningHtml,
+                           ${missingWordsHtml}` + amountWarningHtml,
                     confirmButtonColor: '#3498db',
                     confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
@@ -714,7 +718,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ผ่านเกณฑ์!',
-                    html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ มีตัวเลขสาขาไม่ตรงกัน ระบบจึงไม่อนุมัติให้ผ่าน</div>
+                    html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ <strong>มีตัวเลขสาขา/ที่อยู่ไม่ตรงกัน</strong> ระบบจึงไม่อนุมัติให้ผ่าน</div>
                            ${missingWordsHtml}` + amountWarningHtml,
                     confirmButtonColor: '#e74c3c',
                     confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
