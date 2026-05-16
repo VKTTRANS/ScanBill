@@ -61,14 +61,15 @@
         }
 
         .warning-note {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px 15px;
-            border-radius: 8px;
+            background-color: #f1f3f9;
+            color: #3f51b5;
+            padding: 12px 15px;
+            border-radius: 12px;
             font-size: 13px;
-            text-align: center;
+            text-align: left;
             margin-bottom: 25px;
-            border: 1px solid #ffeeba;
+            border: 1px solid #e1e4ed;
+            line-height: 1.5;
         }
 
         .form-group { margin-bottom: 25px; }
@@ -312,8 +313,11 @@
     </div>
 
     <div class="warning-note">
-        <strong>💡 หมายเหตุระบบ AI (OCR):</strong><br>
-        เพื่อลดข้อผิดพลาดจากการสแกน ระบบจะถือว่าอักษร <strong>0 (ศูนย์) กับ O (โอ)</strong> และ <strong>1 (หนึ่ง) กับ I, l (ไอ, แอล)</strong> มีค่าเท่ากัน นอกนั้นตัวอักษรต้องตรงกัน 100%
+        <strong>📊 ลอจิกการตรวจสอบแบบขั้นบันได (Multi-stage):</strong><br>
+        • <strong>ความแม่นยำ 100%:</strong> ผ่านฉลุย ไม่ต้องตรวจสอบซ้ำ<br>
+        • <strong>ความแม่นยำ 90% - 99%:</strong> ผ่านชั่วคราว (กรุณาตรวจสอบให้ละเอียดอีกครั้ง)<br>
+        • <strong>ความแม่นยำ 80% - 89%:</strong> ผ่านชั่วคราว (กรุณาตรวจสอบโดยละเอียดที่สุด)<br>
+        • <strong>ต่ำกว่า 80% หรือ TaxID ไม่ตรง:</strong> ปรับตกทันที ต้องให้พนักงานตรวจสอบเอง
     </div>
     
     <div class="form-group">
@@ -416,11 +420,7 @@
                     });
 
                     $('#dataSelect').addClass('select2-ready');
-
-                    $('#dataSelect').on('change', function() {
-                        displaySelectedData();
-                    });
-                    
+                    $('#dataSelect').on('change', function() { displaySelectedData(); });
                     Swal.close();
                 });
 
@@ -429,12 +429,7 @@
             }
         }).catch(err => {
             console.error(err);
-            Swal.fire({
-                icon: 'error',
-                title: 'การเชื่อมต่อล้มเหลว',
-                text: 'ไม่สามารถดึงฐานข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต',
-                confirmButtonColor: '#4361ee'
-            });
+            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อล้มเหลว', text: 'ไม่สามารถดึงฐานข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต', confirmButtonColor: '#4361ee' });
         });
     };
 
@@ -459,9 +454,7 @@
             displayDiv.appendChild(itemDiv);
         }
         
-        if (currentBase64 !== "") {
-            submitBtn.disabled = false;
-        }
+        if (currentBase64 !== "") { submitBtn.disabled = false; }
     }
 
     function previewFile(inputElement) {
@@ -482,10 +475,7 @@
                 preview.src = reader.result;
                 preview.style.display = "block";
                 currentBase64 = reader.result.split(',')[1];
-                
-                if (selectedIndex && selectedIndex !== "") {
-                    submitBtn.disabled = false;
-                }
+                if (selectedIndex && selectedIndex !== "") { submitBtn.disabled = false; }
             }
             reader.readAsDataURL(file);
         } else {
@@ -494,15 +484,6 @@
             currentBase64 = "";
             submitBtn.disabled = true;
         }
-    }
-
-    // ฟังก์ชันแปลงตัวอักษรเสี่ยง (OCR Normalization) ก่อนเทียบแบบ 100%
-    function normalizeOCR(str) {
-        if (!str) return "";
-        return str.toLowerCase()
-                  .replace(/0/g, 'o')         // แปลงเลข 0 เป็นตัว o
-                  .replace(/[1il]/g, '1')     // แปลงตัว l, i เป็นเลข 1
-                  .replace(/[^a-z0-9ก-๙]/g, ''); // ตัดอักษรพิเศษและช่องว่างทิ้ง
     }
 
     async function processDocument() {
@@ -519,7 +500,6 @@
         }
 
         const selectedItem = globalData[selectedIndex];
-        
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
         const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
@@ -528,20 +508,13 @@
         
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอย่างละเอียด (Strict Mode)',
+            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอย่างละเอียด',
             allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading()
-            }
+            didOpen: () => { Swal.showLoading() }
         });
 
         const visionPayload = {
-            requests: [
-                {
-                    image: { content: currentBase64 },
-                    features: [{ type: "TEXT_DETECTION" }]
-                }
-            ]
+            requests: [ { image: { content: currentBase64 }, features: [{ type: "TEXT_DETECTION" }] } ]
         };
 
         try {
@@ -552,7 +525,6 @@
             });
 
             const visionData = await visionResponse.json();
-            
             if (visionData.responses[0].error) {
                 Swal.fire('ข้อผิดพลาด AI', visionData.responses[0].error.message, 'error');
                 submitBtn.disabled = false;
@@ -560,19 +532,15 @@
             }
 
             const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
-            
-            // ตรวจหา TaxID ด้วยตัวเลขล้วน (บังคับตรงเป๊ะ 100%)
             const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
 
-            // ตรวจหายอดเงินในบิล
+            // ตรวจหายอดเงินสุทธิในบิล
             const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
             let maxAmount = 0;
             if (moneyMatches) {
                 moneyMatches.forEach(m => {
                     const val = parseFloat(m.replace(/,/g, ''));
-                    if (val > maxAmount) {
-                        maxAmount = val;
-                    }
+                    if (val > maxAmount) { maxAmount = val; }
                 });
             }
 
@@ -586,79 +554,109 @@
                 </div>`;
             }
 
-            let isMatch = true;
-            let foundTaxId = false;
-            let foundCompanyName = false;
-            let foundAddress = false;
-
-            // แปลงข้อความที่ AI อ่านได้ ด้วยกฎ OCR Normalization ก่อนเช็ค
-            const strictOcrText = normalizeOCR(detectedText);
-
-            // 1. เช็ค TaxID (ตัวเลขเพียวๆ)
-            if (taxIdToMatch) {
-                if (cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
-                    foundTaxId = true;
-                } else {
-                    isMatch = false;
+            // ------------------------------------------------------------------
+            // ลอจิกคำนวณคะแนนตามสัดส่วนคำศัพท์ (Fuzzy Math Logic)
+            // ------------------------------------------------------------------
+            function getMatchScore(dbText, ocrText) {
+                if (!dbText) return 0;
+                const cleanStr = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
+                const words = cleanStr.split(/\s+/).filter(w => w.length > 1);
+                
+                if (words.length === 0) {
+                    const strictDb = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
+                    const strictOcr = ocrText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
+                    return strictOcr.includes(strictDb) ? 1.0 : 0;
                 }
-            }
-            
-            // 2. เช็คชื่อบริษัท (แปลงร่างก่อน แล้วตรวจเป๊ะ 100% ขาดไม่ได้แม้แต่ตัวเดียว)
-            if (companyNameToMatch) {
-                const strictDbCompany = normalizeOCR(companyNameToMatch);
-                if (strictOcrText.includes(strictDbCompany)) {
-                    foundCompanyName = true;
-                } else {
-                    isMatch = false;
-                }
+                
+                const lowerOcr = ocrText.toLowerCase();
+                let matchCount = 0;
+                words.forEach(w => { if (lowerOcr.includes(w)) { matchCount++; } });
+                return matchCount / words.length;
             }
 
-            // 3. เช็คที่อยู่ (แปลงร่างก่อน แล้วตรวจเป๊ะ 100% ขาดไม่ได้แม้แต่ตัวเดียว)
-            if (addressToMatch) {
-                const strictDbAddress = normalizeOCR(addressToMatch);
-                if (strictOcrText.includes(strictDbAddress)) {
-                    foundAddress = true;
-                } else {
-                    isMatch = false;
-                }
+            // 1. ตรวจสอบ TaxID (ตัวเลข 13 หลัก บังคับตรง 100% เท่านั้น ห้ามผ่านขั้นบันได)
+            let taxIdPassed = true;
+            if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
+                taxIdPassed = false;
             }
 
-            if (!taxIdToMatch && !companyNameToMatch && !addressToMatch) {
-                isMatch = false;
-            }
+            // 2. คำนวณคะแนนของ ชื่อ และ ที่อยู่
+            let companyScore = companyNameToMatch ? getMatchScore(companyNameToMatch, detectedText) : 1.0;
+            let addressScore = addressToMatch ? getMatchScore(addressToMatch, detectedText) : 1.0;
 
-            if (!isMatch) {
-                let errorDetailsHtml = `
-                <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height: 1.5;">
-                    <strong>❌ จุดที่ตรวจสอบไม่พบในเอกสาร (ต้องตรงครบทุกตัวอักษร):</strong><br>
-                    ${(taxIdToMatch && !foundTaxId) ? `• เลขผู้เสียภาษี: <span style="text-decoration: underline;">${taxIdToMatch}</span><br>` : ''}
-                    ${(companyNameToMatch && !foundCompanyName) ? `• ชื่อบริษัท: <span style="text-decoration: underline;">${companyNameToMatch}</span><br>` : ''}
-                    ${(addressToMatch && !foundAddress) ? `• ที่อยู่: <span style="text-decoration: underline;">${addressToMatch}</span>` : ''}
+            // หาคะแนนเฉลี่ยที่ต่ำที่สุดระหว่าง ชื่อ และ ที่อยู่ เพื่อเอามาตัดเกรดขั้นบันได
+            let lowestScore = Math.min(companyScore, addressScore);
+
+            // 3. แสดงผลลัพธ์แบบขั้นบันได (Multi-stage Alert)
+            if (!taxIdPassed) {
+                // เคสที่ 1: เลขผู้เสียภาษีไม่ตรง ปรับตกทันที ไม่คิดคะแนนตัวอื่น
+                let taxErrorHtml = `
+                <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
+                    <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรงกับระบบ</strong><br>
+                    • เลขในระบบคือ: <span style="text-decoration: underline; font-weight:bold;">${taxIdToMatch}</span>
                 </div>`;
 
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ตรงกัน!',
-                    html: '<div style="font-size: 15px;">เอกสารนี้ไม่ตรงกับฐานข้อมูลที่คุณเลือก</div>' + errorDetailsHtml + amountWarningHtml,
+                    html: '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ</div>' + taxErrorHtml + amountWarningHtml,
                     confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'รับทราบ'
+                    confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
                 });
                 submitBtn.disabled = false;
-            } else {
+
+            } else if (lowestScore === 1.0) {
+                // เคสที่ 2: ตรงเป๊ะ 100% (ไฟเขียวผ่านฉลุย)
                 Swal.fire({
                     icon: 'success',
                     title: 'ถูกต้องครบถ้วน!',
-                    html: '<div style="font-size: 15px;">ข้อมูล ชื่อ, ที่อยู่ และเลขผู้เสียภาษี ตรงกับระบบเรียบร้อยแล้ว</div>' + amountWarningHtml,
+                    html: '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ตรวจผ่าน 100% ข้อมูลตรงกับระบบทั้งหมด</div>' + amountWarningHtml,
                     confirmButtonColor: '#2ecc71',
                     confirmButtonText: 'ตกลง'
-                }).then(() => {
-                    document.getElementById('cameraInput').value = "";
-                    document.getElementById('galleryInput').value = "";
-                    document.getElementById('preview').style.display = "none";
-                    $('#dataSelect').val(null).trigger('change');
-                    currentBase64 = "";
-                    submitBtn.disabled = true;
+                }).then(() => { resetForm(); });
+
+            } else if (lowestScore >= 0.90) {
+                // เคสที่ 3: ตรงช่วง 90% - 99% (ไฟน้ำเงิน เตือนแบบเบา)
+                let accuracyPercent = Math.round(lowestScore * 100);
+                Swal.fire({
+                    icon: 'info',
+                    title: 'ตรวจสอบผ่าน 90% ขึ้นไป',
+                    html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ตรวจพบข้อมูลถูกต้องประมาณ ${accuracyPercent}%</div>
+                           <div style="font-size: 14px; margin-top:5px; color:#555;">🔍 กรุณาตรวจสอบให้ละเอียดอีกครั้งก่อนบันทึก</div>` + amountWarningHtml,
+                    confirmButtonColor: '#3498db',
+                    confirmButtonText: 'ผ่าน (ยืนยันตรวจสอบแล้ว)'
+                }).then(() => { resetForm(); });
+
+            } else if (lowestScore >= 0.80) {
+                // เคสที่ 4: ตรงช่วง 80% - 89% (ไฟส้ม เตือนเข้มงวด)
+                let accuracyPercent = Math.round(lowestScore * 100);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ตรวจสอบผ่าน 80% ขึ้นไป',
+                    html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องประมาณ ${accuracyPercent}%</div>
+                           <div style="font-size: 14px; margin-top:5px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! เอกสารอาจมีความเพี้ยน</div>` + amountWarningHtml,
+                    confirmButtonColor: '#f39c12',
+                    confirmButtonText: 'ผ่าน (ยืนยันตรวจละเอียดแล้ว)'
+                }).then(() => { resetForm(); });
+
+            } else {
+                // เคสที่ 5: ต่ำกว่า 80% ปรับตกทันที เด้งสีแดง บังคับเช็คเอง
+                let accuracyPercent = Math.round(lowestScore * 100);
+                let failDetailsHtml = `
+                <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height:1.5;">
+                    <strong>❌ ข้อมูลมีความถูกต้องต่ำเกินไป (${accuracyPercent}%)</strong><br>
+                    • ชื่อบริษัทในระบบ: ${companyNameToMatch}<br>
+                    • ที่อยู่บางส่วนในระบบ: ${addressToMatch.substring(0, 40)}...
+                </div>`;
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ข้อมูลไม่ผ่านเกณฑ์!',
+                    html: '<div style="font-size: 15px;">คะแนนความแม่นยำต่ำกว่า 80% ระบบไม่สามารถให้อนุมัติผ่านได้</div>' + failDetailsHtml + amountWarningHtml,
+                    confirmButtonColor: '#e74c3c',
+                    confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
                 });
+                submitBtn.disabled = false;
             }
 
         } catch (error) {
@@ -666,6 +664,15 @@
             Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับ AI ได้ กรุณาลองใหม่อีกครั้ง', 'error');
             submitBtn.disabled = false;
         }
+    }
+
+    function resetForm() {
+        document.getElementById('cameraInput').value = "";
+        document.getElementById('galleryInput').value = "";
+        document.getElementById('preview').style.display = "none";
+        $('#dataSelect').val(null).trigger('change');
+        currentBase64 = "";
+        document.getElementById("submitBtn").disabled = true;
     }
 </script>
 
