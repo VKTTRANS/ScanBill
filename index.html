@@ -380,7 +380,6 @@
     let globalData = [];
     let currentBase64Array = [];
 
-    // ฟังก์ชันโหลดข้อมูล ยุบรวมเรียกใช้ได้ทั้งเปิดหน้าและตอนรีเซ็ต
     function fetchDataFromSheet(isRefresh = false) {
         Swal.fire({
             title: isRefresh ? 'กำลังอัปเดตข้อมูล...' : 'กำลังเชื่อมต่อระบบ...',
@@ -396,7 +395,8 @@
                 globalData = res.data;
                 const select = document.getElementById("dataSelect");
                 
-                select.innerHTML = '<option value="">-- พิมพ์ค้นหา หรือ เลือกบริษัท --</option>';
+                // แก้บั๊กภาพลวงตา: ใส่ option เปล่าๆ เข้าไปตัวแรกสุด เพื่อให้ Placeholder ทำงานได้สมบูรณ์
+                select.innerHTML = '<option value=""></option>';
 
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
@@ -724,7 +724,6 @@
                 </div>`;
             }
 
-            // แสดงผลลัพธ์และผูกคำสั่งรีเฟรชข้อมูลเมื่อปิดหน้าต่าง
             if (!taxIdPassed) {
                 let taxErrorHtml = `
                 <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
@@ -798,7 +797,7 @@
         currentBase64Array = [];
         document.getElementById("submitBtn").disabled = true;
         
-        // เมื่อทำงานเสร็จ วิ่งไปโหลดข้อมูลจากระบบใหม่ทันที
+        // โหลดข้อมูลใหม่ และรีเซ็ต Select Box กลับไปจุดเริ่มต้น
         fetchDataFromSheet(true);
     }
 </script>
