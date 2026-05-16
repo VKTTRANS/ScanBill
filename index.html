@@ -494,14 +494,17 @@
         }
 
         const selectedItem = globalData[selectedIndex];
+        
+        // ดึงข้อมูลทั้ง 3 อย่างมาเตรียมไว้ตรวจสอบ
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
+        const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
         
         submitBtn.disabled = true;
         
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบเอกสาร',
+            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอย่างละเอียด',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading()
@@ -533,7 +536,10 @@
             }
 
             const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
-            const cleanDetectedText = detectedText.replace(/\D/g, '');
+            
+            // เตรียม Text ไว้ 2 แบบ แบบเอาแค่ตัวเลข กับแบบตัดสเปซ/เครื่องหมายวรรคตอนออกหมด
+            const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
+            const cleanDetectedTextNoPunctuation = detectedText.toLowerCase().replace(/[\s\(\)\.,-]/g, '');
 
             // 1. ตรวจหายอดเงินในบิล
             const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
@@ -557,37 +563,60 @@
                 </div>`;
             }
 
-            // 2. ตรวจสอบความตรงกัน
-            let isMatch = false;
+            // 2. ตรวจสอบความตรงกัน (โหมดเข้มงวด: ต้องเจอครบทุกอย่างที่มีในฐานข้อมูล)
+            let isMatch = true; // สมมติว่าถูกไว้ก่อน แล้วหาจุดจับผิด
             let foundTaxId = false;
             let foundCompanyName = false;
+            let foundAddress = false;
 
-            if (taxIdToMatch && cleanDetectedText.includes(taxIdToMatch)) {
-                foundTaxId = true;
-                isMatch = true;
+            // เช็ค TaxID
+            if (taxIdToMatch) {
+                if (cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
+                    foundTaxId = true;
+                } else {
+                    isMatch = false; // ถ้ามีในระบบแต่หาบนบิลไม่เจอ ถือว่าตกทันที
+                }
             }
             
-            const cleanTextLower = detectedText.toLowerCase().replace(/\s/g, '');
-            const companyNameLower = companyNameToMatch.toLowerCase().replace(/\s/g, '');
-            if (companyNameLower && cleanTextLower.includes(companyNameLower)) {
-                foundCompanyName = true;
-                isMatch = true;
+            // เช็คชื่อบริษัท (ลบช่องว่างและเครื่องหมายออกก่อนเทียบ)
+            if (companyNameToMatch) {
+                const companyNameStrictLower = companyNameToMatch.toLowerCase().replace(/[\s\(\)\.,-]/g, '');
+                if (cleanDetectedTextNoPunctuation.includes(companyNameStrictLower)) {
+                    foundCompanyName = true;
+                } else {
+                    isMatch = false;
+                }
+            }
+
+            // เช็คที่อยู่ (ลบช่องว่างและเครื่องหมายออกก่อนเทียบ)
+            if (addressToMatch) {
+                const addressStrictLower = addressToMatch.toLowerCase().replace(/[\s\(\)\.,-]/g, '');
+                if (cleanDetectedTextNoPunctuation.includes(addressStrictLower)) {
+                    foundAddress = true;
+                } else {
+                    isMatch = false;
+                }
+            }
+
+            // กันเหนียว: ถ้าฐานข้อมูลว่างเปล่าเลยทั้ง 3 ช่อง ให้ถือว่าไม่ผ่าน
+            if (!taxIdToMatch && !companyNameToMatch && !addressToMatch) {
+                isMatch = false;
             }
 
             // 3. แสดงผลลัพธ์
             if (!isMatch) {
-                // สร้างกล่องข้อความบอก "จุดที่ผิด"
                 let errorDetailsHtml = `
                 <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height: 1.5;">
-                    <strong>❌ ไม่พบข้อมูลต่อไปนี้ในเอกสาร:</strong><br>
-                    ${taxIdToMatch ? `• เลขผู้เสียภาษี: ${taxIdToMatch}<br>` : ''}
-                    ${companyNameToMatch ? `• ชื่อบริษัท: ${companyNameToMatch}` : ''}
+                    <strong>❌ จุดที่ตรวจสอบไม่พบในเอกสาร:</strong><br>
+                    ${(taxIdToMatch && !foundTaxId) ? `• เลขผู้เสียภาษี: <span style="text-decoration: underline;">${taxIdToMatch}</span><br>` : ''}
+                    ${(companyNameToMatch && !foundCompanyName) ? `• ชื่อบริษัท: <span style="text-decoration: underline;">${companyNameToMatch}</span><br>` : ''}
+                    ${(addressToMatch && !foundAddress) ? `• ที่อยู่: <span style="text-decoration: underline;">${addressToMatch}</span>` : ''}
                 </div>`;
 
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ตรงกัน!',
-                    html: '<div style="font-size: 15px;">ตรวจพบว่าข้อมูลบนเอกสาร ไม่ตรง กับฐานข้อมูลในระบบ</div>' + errorDetailsHtml + amountWarningHtml,
+                    html: '<div style="font-size: 15px;">เอกสารนี้ไม่ตรงกับฐานข้อมูลที่คุณเลือก</div>' + errorDetailsHtml + amountWarningHtml,
                     confirmButtonColor: '#e74c3c',
                     confirmButtonText: 'รับทราบ'
                 });
@@ -596,7 +625,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'ถูกต้องครบถ้วน!',
-                    html: '<div style="font-size: 15px;">ข้อมูลบนเอกสารตรงกับระบบเรียบร้อยแล้ว</div>' + amountWarningHtml,
+                    html: '<div style="font-size: 15px;">ข้อมูล ชื่อ, ที่อยู่ และเลขผู้เสียภาษี ตรงกับระบบเรียบร้อยแล้ว</div>' + amountWarningHtml,
                     confirmButtonColor: '#2ecc71',
                     confirmButtonText: 'ตกลง'
                 }).then(() => {
