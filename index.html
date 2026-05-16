@@ -60,8 +60,9 @@
     let globalData = [];
     let currentBase64 = "";
 
-    window.onload = function() {
-        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Database`)
+window.onload = function() {
+        // บังคับดึงข้อมูลจากแท็บ Setting (ตามที่คุณแคปรูปมาล่าสุด)
+        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Setting`)
         .then(response => response.json())
         .then(res => {
             if(res.status === "success") {
@@ -72,8 +73,19 @@
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
                     option.value = index;
-                    const companyName = item["CompanyName"] || Object.values(item)[0];
-                    option.text = companyName ? companyName : `รายการที่ ${index + 1}`; 
+                    
+                    // ดึงค่าทุกคอลัมน์ของแถวนั้นๆ ออกมา
+                    const values = Object.values(item);
+                    
+                    // เอาข้อมูลคอลัมน์แรก (ตัวเลขรหัส)
+                    let displayText = values[0]; 
+                    
+                    // ถ้ามีข้อมูลคอลัมน์ที่สอง (ชื่อบริษัท) ให้เอามาต่อท้ายด้วยขีดกลาง
+                    if(values.length > 1 && values[1] !== "") {
+                        displayText += " - " + values[1];
+                    }
+                    
+                    option.text = displayText ? displayText : `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
                 });
             } else {
