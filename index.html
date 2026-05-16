@@ -6,7 +6,6 @@
     <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
@@ -68,7 +67,6 @@
             font-size: 15px;
         }
 
-        /* ตกแต่ง Dropdown ใหม่ */
         select { 
             width: 100%; 
             padding: 16px; 
@@ -79,7 +77,7 @@
             background-color: #fcfcfc;
             color: var(--text-main);
             outline: none;
-            appearance: none; /* ซ่อนลูกศรเดิม */
+            appearance: none; 
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%24%2024%22%20fill%3D%22none%22%20stroke%3D%22%236c757d%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
             background-repeat: no-repeat;
             background-position: right 15px top 50%;
@@ -92,7 +90,6 @@
             box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
         }
 
-        /* ส่วนแสดงข้อมูล */
         .data-section { 
             margin-bottom: 30px; 
             border: 1px solid var(--border-light); 
@@ -138,42 +135,62 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* ส่วนอัปโหลดรูปล้ำๆ */
-        .upload-section { 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        /* ปรับปรุงส่วนอัปโหลดให้มี 2 ปุ่ม */
+        .upload-container {
             border: 2px dashed #bcccff; 
-            padding: 40px 20px; 
+            padding: 25px 20px; 
             border-radius: 16px; 
             background-color: #f4f7ff; 
-            cursor: pointer; 
             margin-bottom: 25px; 
-            transition: all 0.3s ease;
+            text-align: center;
         }
-        .upload-section:hover {
-            border-color: var(--primary);
-            background-color: #edf1ff;
-        }
-        .upload-section:active { 
-            transform: scale(0.98);
-        }
-        .upload-icon {
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-        .upload-text {
-            margin: 0; 
+        
+        .upload-header {
+            margin: 0 0 15px 0; 
             color: var(--primary); 
             font-weight: 500;
             font-size: 16px;
         }
-        .upload-subtext {
-            margin: 8px 0 0 0;
-            font-size: 14px;
-            color: var(--text-muted);
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
+
+        .action-btn {
+            background-color: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .action-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+
         input[type="file"] { display: none; }
         
         #preview { 
@@ -185,10 +202,11 @@
             box-shadow: var(--shadow-md);
             object-fit: contain;
             animation: fadeIn 0.4s ease-out;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* ปุ่มกด Gradient */
-        button { 
+        button.submit-btn { 
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
             color: white; 
             border: none; 
@@ -206,40 +224,23 @@
             justify-content: center;
             gap: 10px;
         }
-        button:hover { 
+        button.submit-btn:hover { 
             box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
             transform: translateY(-2px);
         }
-        button:active {
+        button.submit-btn:active {
             transform: translateY(1px);
         }
-        button:disabled { 
+        button.submit-btn:disabled { 
             background: #cbd5e1; 
             box-shadow: none;
             cursor: not-allowed; 
             transform: none;
         }
 
-        .status-msg { 
-            text-align: center; 
-            font-weight: 500; 
-            margin-top: 20px; 
-            padding: 15px; 
-            border-radius: 12px; 
-            font-size: 15px;
-            display: none;
-            animation: pulse 2s infinite;
-        }
-
-        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
         }
     </style>
 </head>
@@ -270,22 +271,38 @@
         </div>
     </div>
 
-    <div class="upload-section" onclick="document.getElementById('fileInput').click()">
-        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-            <circle cx="12" cy="13" r="4"></circle>
-        </svg>
-        <p class="upload-text">แตะเพื่อถ่ายรูป หรือ เลือกไฟล์เอกสาร</p>
-        <p class="upload-subtext">รองรับรูปถ่ายจากกล้องมือถือและไฟล์รูปภาพ</p>
-        <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="previewFile()">
+    <div class="upload-container">
+        <p class="upload-header">2. นำเข้าเอกสารเพื่อตรวจสอบ</p>
+        
+        <div class="action-buttons">
+            <div class="action-btn" onclick="document.getElementById('cameraInput').click()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                ถ่ายรูปใหม่
+            </div>
+            
+            <div class="action-btn" onclick="document.getElementById('galleryInput').click()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                อัปโหลดรูปภาพ
+            </div>
+        </div>
+
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="previewFile(this)">
+        <input type="file" id="galleryInput" accept="image/*" onchange="previewFile(this)">
+        
         <img id="preview" src="" alt="ตัวอย่างรูปถ่าย">
     </div>
 
-    <button id="submitBtn" onclick="processDocument()" disabled>
+    <button id="submitBtn" class="submit-btn" onclick="processDocument()" disabled>
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
         เริ่มสแกนตรวจสอบ
     </button>
-    <div id="status" class="status-msg"></div>
 </div>
 
 <script>
@@ -351,31 +368,36 @@
             displayDiv.appendChild(itemDiv);
         }
         
-        // ถ้ารูปมีแล้วและเลือกข้อมูลแล้ว ให้ปลดล็อกปุ่ม
         if (currentBase64 !== "") {
             submitBtn.disabled = false;
         }
     }
 
-    function previewFile() {
-        const file = document.getElementById('fileInput').files[0];
+    // ฟังก์ชันนี้ถูกปรับให้รับพารามิเตอร์ (input element) ว่ามาจากปุ่มไหน
+    function previewFile(inputElement) {
+        const file = inputElement.files[0];
         const preview = document.getElementById('preview');
         const submitBtn = document.getElementById("submitBtn");
         const selectedIndex = document.getElementById("dataSelect").value;
-        const reader = new FileReader();
-
-        reader.onloadend = function () {
-            preview.src = reader.result;
-            preview.style.display = "block";
-            currentBase64 = reader.result.split(',')[1];
-            
-            // ถ้ารูปมีแล้วและเลือกข้อมูลแล้ว ให้ปลดล็อกปุ่ม
-            if (selectedIndex !== "") {
-                submitBtn.disabled = false;
-            }
+        
+        // เคลียร์ค่า input อีกตัวทิ้ง เพื่อไม่ให้ข้อมูลกวนกัน
+        if(inputElement.id === 'cameraInput') {
+            document.getElementById('galleryInput').value = "";
+        } else {
+            document.getElementById('cameraInput').value = "";
         }
 
         if (file) {
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                preview.src = reader.result;
+                preview.style.display = "block";
+                currentBase64 = reader.result.split(',')[1];
+                
+                if (selectedIndex !== "") {
+                    submitBtn.disabled = false;
+                }
+            }
             reader.readAsDataURL(file);
         } else {
             preview.src = "";
@@ -385,26 +407,11 @@
         }
     }
 
-    function updateStatus(message, type) {
-        const statusDiv = document.getElementById('status');
-        statusDiv.innerText = message;
-        
-        if(type === "loading") {
-            statusDiv.style.display = "block";
-            statusDiv.style.backgroundColor = "#fff8e1";
-            statusDiv.style.color = "#f57c00";
-            statusDiv.style.border = "1px solid #ffe0b2";
-        } else {
-            statusDiv.style.display = "none";
-        }
-    }
-
     async function processDocument() {
-        const fileInput = document.getElementById('fileInput');
         const selectedIndex = document.getElementById("dataSelect").value;
         const submitBtn = document.getElementById("submitBtn");
         
-        if (fileInput.files.length === 0 || !currentBase64) {
+        if (!currentBase64) {
             Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนสแกน', confirmButtonColor: '#4361ee' });
             return;
         }
@@ -418,7 +425,6 @@
         
         submitBtn.disabled = true;
         
-        // ใช้ SweetAlert แบบแสดงสถานะโหลด
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
             html: 'กรุณารอสักครู่ ระบบกำลังแยกแยะตัวอักษร',
@@ -457,11 +463,9 @@
 
             let isMatch = false;
             
-            // ตรวจสอบ TaxID (แม่นยำที่สุด)
             if (taxIdToMatch && cleanDetectedText.includes(taxIdToMatch)) {
                 isMatch = true;
             } else {
-                // ถ้าไม่มี TaxID ให้ลองเทียบจากชื่อ
                 const companyName = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString().toLowerCase().replace(/\s/g, '') : "";
                 const cleanTextLower = detectedText.toLowerCase().replace(/\s/g, '');
                 if (companyName && cleanTextLower.includes(companyName)) {
@@ -487,8 +491,8 @@
                     confirmButtonText: 'ตกลง',
                     timer: 3000
                 }).then(() => {
-                    // รีเซ็ตหน้าจอเพื่อพร้อมสำหรับสแกนใบถัดไป
-                    fileInput.value = "";
+                    document.getElementById('cameraInput').value = "";
+                    document.getElementById('galleryInput').value = "";
                     document.getElementById('preview').style.display = "none";
                     document.getElementById("dataSelect").value = "";
                     displaySelectedData();
