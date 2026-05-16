@@ -1,0 +1,294 @@
+:root {
+    --primary: #4361ee;
+    --primary-hover: #3a0ca3;
+    --secondary: #4cc9f0;
+    --bg-color: #f8f9fc;
+    --card-bg: #ffffff;
+    --text-main: #2b2d42;
+    --text-muted: #6c757d;
+    --border-light: #e2e8f0;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 10px 25px rgba(67, 97, 238, 0.1);
+}
+
+body { 
+    font-family: 'Kanit', sans-serif; 
+    background-color: var(--bg-color); 
+    margin: 0; 
+    padding: 20px 15px; 
+    color: var(--text-main); 
+}
+
+.container { 
+    max-width: 700px; 
+    margin: 0 auto; 
+    background: var(--card-bg); 
+    padding: 30px 25px; 
+    border-radius: 24px; 
+    box-shadow: var(--shadow-md); 
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.header h2 { 
+    color: var(--primary); 
+    margin: 0 0 8px 0; 
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.header p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 15px;
+}
+
+.warning-note {
+    background-color: #f8f9fc;
+    color: #2c3e50;
+    padding: 12px 15px;
+    border-radius: 10px;
+    font-size: 13px;
+    text-align: left;
+    margin-bottom: 25px;
+    border: 1px solid #dcdde1;
+    line-height: 1.6;
+}
+
+.form-group { margin-bottom: 25px; }
+
+label {
+    font-weight: 500; 
+    color: var(--text-main); 
+    display: block; 
+    margin-bottom: 10px; 
+    font-size: 15px;
+}
+
+#dataSelect {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.select2-ready {
+    opacity: 1 !important;
+}
+
+/* แก้ไขบั๊กตัวหนังสือล่องหนของ Select2 ตรงนี้ครับ */
+.select2-container--default .select2-selection--single {
+    height: 56px;
+    border-radius: 14px;
+    border: 2px solid var(--border-light);
+    background-color: #fcfcfc;
+    transition: all 0.3s ease;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--primary);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px;
+    color: var(--text-main);
+    padding-left: 16px;
+    line-height: 52px; /* ใช้ line-height จัดให้อยู่กึ่งกลางแทน flexbox */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #999;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 54px;
+    right: 12px;
+    top: 1px;
+}
+
+.select2-dropdown {
+    font-family: 'Kanit', sans-serif;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.select2-search__field {
+    font-family: 'Kanit', sans-serif;
+    border-radius: 8px !important;
+    padding: 10px !important;
+}
+
+.select2-results__option {
+    padding: 12px 16px;
+    font-size: 15px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary);
+}
+
+.data-section { 
+    margin-bottom: 30px; 
+    border: 1px solid var(--border-light); 
+    padding: 20px; 
+    border-radius: 16px; 
+    background-color: #fafbfc; 
+    animation: fadeIn 0.4s ease-out;
+}
+
+.data-section h3 {
+    margin: 0 0 15px 0; 
+    color: var(--text-main); 
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+}
+
+@media (max-width: 600px) { 
+    .info-grid { grid-template-columns: 1fr; } 
+    .container { padding: 25px 20px; border-radius: 20px;}
+}
+
+.info-item label { 
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.info-item span { 
+    display: block; 
+    padding: 12px 15px; 
+    background: #fff; 
+    border: 1px solid var(--border-light); 
+    border-radius: 10px; 
+    font-size: 15px; 
+    word-break: break-word; 
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+}
+
+.upload-container {
+    border: 2px dashed #bcccff; 
+    padding: 25px 20px; 
+    border-radius: 16px; 
+    background-color: #f4f7ff; 
+    margin-bottom: 25px; 
+    text-align: center;
+}
+
+.upload-header {
+    margin: 0 0 15px 0; 
+    color: var(--primary); 
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.action-btn {
+    background-color: white;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.action-btn:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.action-btn:active {
+    transform: scale(0.96);
+}
+
+.action-btn svg {
+    width: 28px;
+    height: 28px;
+}
+
+input[type="file"] { display: none; }
+
+#previewContainer { 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.preview-img {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    object-fit: contain;
+    animation: fadeIn 0.4s ease-out;
+}
+
+button.submit-btn { 
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white; 
+    border: none; 
+    padding: 16px; 
+    font-size: 18px; 
+    font-family: 'Kanit', sans-serif;
+    border-radius: 14px; 
+    cursor: pointer; 
+    width: 100%; 
+    font-weight: 500; 
+    transition: all 0.3s; 
+    box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+button.submit-btn:hover { 
+    box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+    transform: translateY(-2px);
+}
+
+button.submit-btn:active {
+    transform: translateY(1px);
+}
+
+button.submit-btn:disabled { 
+    background: #cbd5e1; 
+    box-shadow: none;
+    cursor: not-allowed; 
+    transform: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
