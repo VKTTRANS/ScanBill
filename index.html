@@ -61,14 +61,14 @@
         }
 
         .warning-note {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px 15px;
-            border-radius: 8px;
+            background-color: #f1f3f9;
+            color: #3f51b5;
+            padding: 12px 15px;
+            border-radius: 12px;
             font-size: 13px;
-            text-align: center;
+            text-align: left;
             margin-bottom: 25px;
-            border: 1px solid #ffeeba;
+            border: 1px solid #e1e4ed;
             line-height: 1.5;
         }
 
@@ -318,8 +318,7 @@
     </div>
 
     <div class="warning-note">
-        <strong>⚠️ ข้อควรระวัง:</strong> หากตรวจสอบไม่ผ่าน 100% ให้สังเกตคำที่ AI หาไม่พบ<br>
-        ระวังตัวอักษรที่คล้ายกัน เช่น <strong>0 (ศูนย์) กับ O (โอ)</strong> หรือ <strong>1, I, l (ไอ, แอล)</strong>
+        <strong>⚠️ กฎเหล็กการตรวจสอบ:</strong> หากคำที่ขาดหายไปบนเอกสารมี <strong>"ตัวเลข"</strong> (เช่น บ้านเลขที่, รหัสสาขาไม่ตรง) ระบบจะบังคับให้ตรวจสอบข้อมูลด้วยตาเปล่าทันที
     </div>
     
     <div class="form-group">
@@ -379,7 +378,7 @@
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
     const VISION_API_KEY = "AIzaSyAUWjUZ43ADkKVCKpefv-d8Fcf20RCCtxw";
     let globalData = [];
-    let currentBase64Array = []; // เปลี่ยนมาเก็บเป็น Array รองรับหลายรูป
+    let currentBase64Array = [];
 
     window.onload = function() {
         Swal.fire({
@@ -465,7 +464,7 @@
         const submitBtn = document.getElementById("submitBtn");
         const selectedIndex = $('#dataSelect').val();
         
-        previewContainer.innerHTML = ""; // ล้างรูปเก่าออก
+        previewContainer.innerHTML = ""; 
         currentBase64Array = [];
 
         if(inputElement.id === 'cameraInput') {
@@ -523,7 +522,6 @@
             didOpen: () => { Swal.showLoading() }
         });
 
-        // ส่งรูปภาพทั้งหมดไปให้ Vision API ประมวลผลพร้อมกัน
         const requests = currentBase64Array.map(b64 => ({
             image: { content: b64 },
             features: [{ type: "TEXT_DETECTION" }]
@@ -546,14 +544,13 @@
                 return;
             }
 
-            // นำ Text จากทุกรูปมารวมกันเป็นก้อนเดียว
             const detectedText = visionData.responses
                                 .map(r => r.fullTextAnnotation ? r.fullTextAnnotation.text : "")
                                 .join("\n");
             
             const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
 
-            // ตรวจหายอดเงินสูงสุด (จากทุกใบรวมกัน)
+            // ตรวจหายอดเงินสุทธิ
             const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
             let maxAmount = 0;
             if (moneyMatches) {
@@ -573,7 +570,7 @@
                 </div>`;
             }
 
-            // ฟังก์ชันวิเคราะห์หาคำที่หายไป
+            // ฟังก์ชันวิเคราะห์คำ และตรวจสอบ "กฎเหล็กเรื่องตัวเลข"
             function analyzeMatch(dbText, ocrText) {
                 if (!dbText) return { score: 1.0, missingWords: [] };
                 
@@ -593,16 +590,29 @@
                 let matchCount = 0;
                 let missing = [];
                 let originalWords = dbText.replace(/[^a-zA-Z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+                let hasNumberMismatch = false; // ตัวแปรเช็คกฎเหล็ก
 
                 words.forEach((w, index) => {
                     if (ocrNoSpaces.includes(w)) {
                         matchCount++;
                     } else {
-                        missing.push(originalWords[index] || w);
+                        let origWord = originalWords[index] || w;
+                        missing.push(origWord);
+                        // ถ้าคำที่หายไปมีตัวเลขผสมอยู่ ถือเป็น Critical Mismatch
+                        if (/\d/.test(origWord)) {
+                            hasNumberMismatch = true;
+                        }
                     }
                 });
 
-                return { score: matchCount / words.length, missingWords: missing };
+                let finalScore = matchCount / words.length;
+
+                // กฎเหล็ก: ถ้าตัวเลข (บ้านเลขที่, รหัสไปรษณีย์) หายไป บังคับคะแนนตกทันที
+                if (hasNumberMismatch && finalScore >= 0.8) {
+                    finalScore = 0.79;
+                }
+
+                return { score: finalScore, missingWords: missing };
             }
 
             // 1. ตรวจสอบ TaxID
@@ -617,7 +627,7 @@
 
             let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
 
-            // สร้าง HTML แสดงข้อมูลอ้างอิงเทียบกับคำที่หาไม่เจอ (เอา OCR text ออกแล้ว)
+            // สร้าง HTML แสดงข้อมูลอ้างอิงและคำที่ขาดหาย
             let missingDetailsHtml = '';
             
             if (companyAnalysis.missingWords.length > 0) {
@@ -667,7 +677,6 @@
                 submitBtn.disabled = false;
 
             } else if (lowestScore === 1.0) {
-                // 100% ผ่านฉลุย
                 Swal.fire({
                     icon: 'success',
                     title: 'ถูกต้องครบถ้วน 100%!',
@@ -677,38 +686,35 @@
                 }).then(() => { resetForm(); });
 
             } else if (lowestScore >= 0.90) {
-                // 90% ขึ้นไป ให้คำแนะนำ
                 let accuracyPercent = Math.round(lowestScore * 100);
                 Swal.fire({
                     icon: 'info',
                     title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
                     html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>
-                           ${missingWordsHtml}` + amountWarningHtml,
+                           ${missingWordsHtml}
+                           <div style="font-size: 14px; margin-top:10px; color:#555;">🔍 โปรดเทียบคำที่หายไปกับเอกสารจริงด้วยตาเปล่าอีกครั้ง</div>` + amountWarningHtml,
                     confirmButtonColor: '#3498db',
                     confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
 
             } else if (lowestScore >= 0.80) {
-                // 80% ขึ้นไป เตือนหนักขึ้น
                 let accuracyPercent = Math.round(lowestScore * 100);
                 Swal.fire({
                     icon: 'warning',
                     title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
                     html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>
                            ${missingWordsHtml}
-                           <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด ระวังเลือกข้อมูลผิดสาขา</div>` + amountWarningHtml,
+                           <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! ระวังเลือกข้อมูลผิดสาขา</div>` + amountWarningHtml,
                     confirmButtonColor: '#f39c12',
                     confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
 
             } else {
-                // ต่ำกว่า 80% ตกทันที แสดงกล่องแบบเดียวกันให้ดูว่าอะไรหายไปบ้าง
                 let accuracyPercent = Math.round(lowestScore * 100);
-
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ผ่านเกณฑ์!',
-                    html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) ระบบไม่อนุมัติให้ผ่าน</div>
+                    html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ มีตัวเลขสาขาไม่ตรงกัน ระบบจึงไม่อนุมัติให้ผ่าน</div>
                            ${missingWordsHtml}` + amountWarningHtml,
                     confirmButtonColor: '#e74c3c',
                     confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
