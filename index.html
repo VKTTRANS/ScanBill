@@ -59,7 +59,7 @@
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
     let globalData = [];
 
-    window.onload = function() {
+window.onload = function() {
         fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Database`)
         .then(response => response.json())
         .then(res => {
@@ -71,7 +71,12 @@
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
                     option.value = index;
-                    option.text = item["CompanyName"] || `รายการที่ ${index + 1}`; 
+                    
+                    // ดึงข้อมูลจาก "คอลัมน์แรกสุด" ของ Sheet (คอลัมน์ A) มาแสดงเสมอ
+                    // วิธีนี้จะหมดปัญหาเรื่องตั้งชื่อหัวคอลัมน์ไม่ตรง
+                    const companyName = Object.values(item)[0];
+                    
+                    option.text = companyName ? companyName : `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
                 });
             } else {
