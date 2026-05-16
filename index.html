@@ -6,7 +6,6 @@
     <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
     
     <link rel="icon" href="data:,">
-    
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -63,17 +62,15 @@
         .form-group { margin-bottom: 25px; }
         label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
 
-        /* =========================================
-           CSS ของ Select2 (สูตรคลีน ไม่ใช้ flex ให้บั๊ก)
-           ========================================= */
         .select2-container { width: 100% !important; }
         
         .select2-container--default .select2-selection--single {
-            height: 56px;
+            min-height: 56px;
             border-radius: 14px;
             border: 2px solid var(--border-light);
             background-color: #fcfcfc;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .select2-container--default.select2-container--open .select2-selection--single {
@@ -86,9 +83,13 @@
             font-family: 'Kanit', sans-serif;
             font-size: 16px;
             color: var(--text-main) !important;
-            padding-left: 16px;
-            line-height: 52px; /* ใช้ความสูงดันให้อยู่ตรงกลางแทน Flex */
+            padding: 14px 45px 14px 16px;
+            line-height: 1.5;
             text-align: left;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__placeholder {
@@ -96,8 +97,22 @@
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 54px;
+            height: 100%;
+            position: absolute;
+            top: 0;
             right: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            float: right;
+            margin-right: -30px;
+            color: #e74c3c;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1.2;
+            cursor: pointer;
         }
 
         .select2-dropdown {
@@ -106,10 +121,12 @@
             border-radius: 12px;
             box-shadow: var(--shadow-md);
             overflow: hidden;
+            z-index: 9999;
         }
 
         .select2-search__field {
             font-family: 'Kanit', sans-serif;
+            font-size: 16px !important;
             border-radius: 8px !important;
             padding: 10px !important;
         }
@@ -120,9 +137,6 @@
             color: white;
         }
 
-        /* =========================================
-           ส่วนแสดงข้อมูลอ้างอิงและปุ่มต่างๆ
-           ========================================= */
         .data-section { 
             margin-bottom: 30px; border: 1px solid var(--border-light); 
             padding: 20px; border-radius: 16px; background-color: #fafbfc; 
@@ -191,7 +205,7 @@
     <div class="form-group">
         <label for="dataSelect">1. พิมพ์ค้นหา หรือ เลือกระเบียนข้อมูล</label>
         <select id="dataSelect" disabled>
-            </select>
+        </select>
     </div>
 
     <div class="data-section">
@@ -253,11 +267,10 @@
             if(res.status === "success") {
                 globalData = res.data;
                 
-                // 🔥 แก้ปัญหาเด็ดขาด: แปลงข้อมูลจาก Google Sheet ยัดเข้าสมอง Select2 โดยตรง
-                const select2Data = [{ id: '', text: '' }]; // ตัวแรกต้องว่างไว้สำหรับ Placeholder
+                const select2Data = [{ id: '', text: '' }]; 
                 globalData.forEach((item, index) => {
                     select2Data.push({
-                        id: index.toString(), // ให้ ID เป็นแค่ตัวเลขธรรมดา
+                        id: index.toString(),
                         text: Object.values(item)[0] || `รายการที่ ${index + 1}`
                     });
                 });
@@ -265,13 +278,11 @@
                 $(document).ready(function() {
                     const $select = $('#dataSelect');
                     
-                    // ทำลายการตั้งค่าเก่า ล้างกล่องให้เกลี้ยง
                     if ($select.hasClass("select2-hidden-accessible")) {
                         $select.select2('destroy');
                     }
                     $select.empty(); 
                     
-                    // ปลุกเสกใหม่ด้วยข้อมูลที่สมบูรณ์
                     $select.select2({
                         data: select2Data, 
                         placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
@@ -282,11 +293,9 @@
                         }
                     });
 
-                    // เปิดกล่องให้ใช้งานได้ และผูกคำสั่งตอนเปลี่ยนชื่อบริษัท
                     $select.prop('disabled', false); 
                     $select.off('change').on('change', function() { displaySelectedData(); });
                     
-                    // สั่งให้กล่องโชว์สถานะว่าง (Placeholder)
                     $select.val('').trigger('change');
 
                     if (isRefresh) {
