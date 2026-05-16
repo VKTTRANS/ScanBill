@@ -44,7 +44,7 @@
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .header h2 { 
@@ -58,6 +58,17 @@
             color: var(--text-muted);
             margin: 0;
             font-size: 15px;
+        }
+
+        .warning-note {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid #ffeeba;
         }
 
         .form-group { margin-bottom: 25px; }
@@ -299,6 +310,11 @@
         <h2>ระบบสแกนเอกสารอัจฉริยะ</h2>
         <p>ตรวจสอบความถูกต้องของเอกสารด้วย Google AI</p>
     </div>
+
+    <div class="warning-note">
+        <strong>💡 หมายเหตุระบบ AI (OCR):</strong><br>
+        เพื่อลดข้อผิดพลาดจากการสแกน ระบบจะถือว่าอักษร <strong>0 (ศูนย์) กับ O (โอ)</strong> และ <strong>1 (หนึ่ง) กับ I, l (ไอ, แอล)</strong> มีค่าเท่ากัน นอกนั้นตัวอักษรต้องตรงกัน 100%
+    </div>
     
     <div class="form-group">
         <label for="dataSelect">1. พิมพ์ค้นหา หรือ เลือกระเบียนข้อมูล</label>
@@ -480,6 +496,15 @@
         }
     }
 
+    // ฟังก์ชันแปลงตัวอักษรเสี่ยง (OCR Normalization) ก่อนเทียบแบบ 100%
+    function normalizeOCR(str) {
+        if (!str) return "";
+        return str.toLowerCase()
+                  .replace(/0/g, 'o')         // แปลงเลข 0 เป็นตัว o
+                  .replace(/[1il]/g, '1')     // แปลงตัว l, i เป็นเลข 1
+                  .replace(/[^a-z0-9ก-๙]/g, ''); // ตัดอักษรพิเศษและช่องว่างทิ้ง
+    }
+
     async function processDocument() {
         const selectedIndex = $('#dataSelect').val();
         const submitBtn = document.getElementById("submitBtn");
@@ -503,7 +528,7 @@
         
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอย่างละเอียด',
+            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอย่างละเอียด (Strict Mode)',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading()
@@ -561,35 +586,15 @@
                 </div>`;
             }
 
-            function isFuzzyMatch(dbText, ocrText, threshold) {
-                if (!dbText) return false;
-                const cleanStr = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
-                const words = cleanStr.split(/\s+/).filter(w => w.length > 1);
-                
-                if (words.length === 0) {
-                    const strictDb = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-                    const strictOcr = ocrText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-                    return strictOcr.includes(strictDb);
-                }
-                
-                const lowerOcr = ocrText.toLowerCase();
-                let matchCount = 0;
-                
-                words.forEach(w => {
-                    if (lowerOcr.includes(w)) {
-                        matchCount++;
-                    }
-                });
-                
-                return (matchCount / words.length) >= threshold;
-            }
-
             let isMatch = true;
             let foundTaxId = false;
             let foundCompanyName = false;
             let foundAddress = false;
 
-            // 1. เช็ค TaxID (ต้องเจอเป๊ะ 100%)
+            // แปลงข้อความที่ AI อ่านได้ ด้วยกฎ OCR Normalization ก่อนเช็ค
+            const strictOcrText = normalizeOCR(detectedText);
+
+            // 1. เช็ค TaxID (ตัวเลขเพียวๆ)
             if (taxIdToMatch) {
                 if (cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
                     foundTaxId = true;
@@ -598,18 +603,20 @@
                 }
             }
             
-            // 2. เช็คชื่อบริษัท (ปรับความแม่นยำเป็น 85%)
+            // 2. เช็คชื่อบริษัท (แปลงร่างก่อน แล้วตรวจเป๊ะ 100% ขาดไม่ได้แม้แต่ตัวเดียว)
             if (companyNameToMatch) {
-                if (isFuzzyMatch(companyNameToMatch, detectedText, 0.85)) {
+                const strictDbCompany = normalizeOCR(companyNameToMatch);
+                if (strictOcrText.includes(strictDbCompany)) {
                     foundCompanyName = true;
                 } else {
                     isMatch = false;
                 }
             }
 
-            // 3. เช็คที่อยู่ (ปรับความแม่นยำเป็น 85%)
+            // 3. เช็คที่อยู่ (แปลงร่างก่อน แล้วตรวจเป๊ะ 100% ขาดไม่ได้แม้แต่ตัวเดียว)
             if (addressToMatch) {
-                if (isFuzzyMatch(addressToMatch, detectedText, 0.85)) {
+                const strictDbAddress = normalizeOCR(addressToMatch);
+                if (strictOcrText.includes(strictDbAddress)) {
                     foundAddress = true;
                 } else {
                     isMatch = false;
@@ -623,7 +630,7 @@
             if (!isMatch) {
                 let errorDetailsHtml = `
                 <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height: 1.5;">
-                    <strong>❌ จุดที่ตรวจสอบไม่พบในเอกสาร:</strong><br>
+                    <strong>❌ จุดที่ตรวจสอบไม่พบในเอกสาร (ต้องตรงครบทุกตัวอักษร):</strong><br>
                     ${(taxIdToMatch && !foundTaxId) ? `• เลขผู้เสียภาษี: <span style="text-decoration: underline;">${taxIdToMatch}</span><br>` : ''}
                     ${(companyNameToMatch && !foundCompanyName) ? `• ชื่อบริษัท: <span style="text-decoration: underline;">${companyNameToMatch}</span><br>` : ''}
                     ${(addressToMatch && !foundAddress) ? `• ที่อยู่: <span style="text-decoration: underline;">${addressToMatch}</span>` : ''}
