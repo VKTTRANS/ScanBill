@@ -62,10 +62,13 @@
         .form-group { margin-bottom: 25px; }
         label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
 
+        /* =========================================
+           CSS ของ Select2 (แก้ปัญหาชื่อหาย + รองรับมือถือ 100%)
+           ========================================= */
         .select2-container { width: 100% !important; }
         
         .select2-container--default .select2-selection--single {
-            min-height: 56px;
+            height: 56px !important; /* บังคับความสูงตายตัว */
             border-radius: 14px;
             border: 2px solid var(--border-light);
             background-color: #fcfcfc;
@@ -83,13 +86,13 @@
             font-family: 'Kanit', sans-serif;
             font-size: 16px;
             color: var(--text-main) !important;
-            padding: 14px 45px 14px 16px;
-            line-height: 1.5;
-            text-align: left;
+            line-height: 52px !important; /* ดันให้อยู่กึ่งกลางพอดีเป๊ะ */
+            padding-left: 16px !important;
+            padding-right: 60px !important; /* เว้นที่ด้านขวาเยอะหน่อย กันข้อความทับปุ่ม X และลูกศร */
             display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: nowrap !important; /* บังคับบรรทัดเดียว ห้ามตกบรรทัด */
+            overflow: hidden !important; 
+            text-overflow: ellipsis !important; /* ถ้าชื่อยาวเกินให้ตัดเป็น ... */
         }
 
         .select2-container--default .select2-selection--single .select2-selection__placeholder {
@@ -97,22 +100,23 @@
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 100%;
+            height: 54px !important;
             position: absolute;
             top: 0;
             right: 12px;
-            display: flex;
-            align-items: center;
         }
 
+        /* แก้ปุ่มกากบาท (Clear) ให้อยู่ถูกที่และคลิกง่าย */
         .select2-container--default .select2-selection--single .select2-selection__clear {
-            float: right;
-            margin-right: -30px;
-            color: #e74c3c;
-            font-size: 20px;
-            font-weight: bold;
-            line-height: 1.2;
-            cursor: pointer;
+            position: absolute !important;
+            right: 35px !important; /* ให้อยู่ซ้ายของลูกศร */
+            top: 0 !important;
+            height: 56px !important;
+            line-height: 56px !important;
+            margin: 0 !important;
+            color: #e74c3c !important;
+            font-size: 22px !important;
+            z-index: 10;
         }
 
         .select2-dropdown {
@@ -121,12 +125,12 @@
             border-radius: 12px;
             box-shadow: var(--shadow-md);
             overflow: hidden;
-            z-index: 9999;
+            z-index: 9999; /* กันเมนูไปซ่อนหลัง element อื่นบนมือถือ */
         }
 
         .select2-search__field {
             font-family: 'Kanit', sans-serif;
-            font-size: 16px !important;
+            font-size: 16px !important; /* บังคับ 16px ป้องกันปัญหา iOS ซูมจอเอง */
             border-radius: 8px !important;
             padding: 10px !important;
         }
