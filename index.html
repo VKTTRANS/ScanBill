@@ -561,17 +561,11 @@
                 </div>`;
             }
 
-            // ------------------------------------------------------------------
-            // ลอจิกใหม่: Word-by-Word Matching (Fuzzy Match) สำหรับเช็คชื่อบริษัทและที่อยู่
-            // ช่วยแก้ปัญหา AI อ่านสัญลักษณ์เพี้ยน (เช่น เลข 0 เป็นตัว O) ทำให้ระบบยังจำคำได้
-            // ------------------------------------------------------------------
             function isFuzzyMatch(dbText, ocrText, threshold) {
                 if (!dbText) return false;
-                // ตัดสัญลักษณ์พิเศษออกหมด แล้วแยกเป็นคำๆ ด้วยช่องว่าง
                 const cleanStr = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
-                const words = cleanStr.split(/\s+/).filter(w => w.length > 1); // เอาเฉพาะคำที่มีความยาว > 1
+                const words = cleanStr.split(/\s+/).filter(w => w.length > 1);
                 
-                // ถ้าฐานข้อมูลสั้นมากจนหั่นคำไม่ได้ ให้กลับไปใช้ระบบตรวจเป๊ะ 100%
                 if (words.length === 0) {
                     const strictDb = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
                     const strictOcr = ocrText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
@@ -581,14 +575,12 @@
                 const lowerOcr = ocrText.toLowerCase();
                 let matchCount = 0;
                 
-                // นับว่าในบิลมีคำจากฐานข้อมูลกี่คำ
                 words.forEach(w => {
                     if (lowerOcr.includes(w)) {
                         matchCount++;
                     }
                 });
                 
-                // ถ้ายอดเปอร์เซ็นต์คำที่เจอ ผ่านเกณฑ์ที่กำหนดไว้ ถือว่าถูกต้อง!
                 return (matchCount / words.length) >= threshold;
             }
 
@@ -606,18 +598,18 @@
                 }
             }
             
-            // 2. เช็คชื่อบริษัท (ยอมให้คลาดเคลื่อนได้นิดหน่อย ต้องเจอคำศัพท์ 80% ขึ้นไป)
+            // 2. เช็คชื่อบริษัท (ปรับความแม่นยำเป็น 85%)
             if (companyNameToMatch) {
-                if (isFuzzyMatch(companyNameToMatch, detectedText, 0.8)) {
+                if (isFuzzyMatch(companyNameToMatch, detectedText, 0.85)) {
                     foundCompanyName = true;
                 } else {
                     isMatch = false;
                 }
             }
 
-            // 3. เช็คที่อยู่ (ที่อยู่ยาวมาก โอกาส AI อ่านผิดสูง จึงให้ผ่านถ้าเจอคำศัพท์ 75% ขึ้นไป)
+            // 3. เช็คที่อยู่ (ปรับความแม่นยำเป็น 85%)
             if (addressToMatch) {
-                if (isFuzzyMatch(addressToMatch, detectedText, 0.75)) {
+                if (isFuzzyMatch(addressToMatch, detectedText, 0.85)) {
                     foundAddress = true;
                 } else {
                     isMatch = false;
