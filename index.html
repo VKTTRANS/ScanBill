@@ -314,7 +314,7 @@
 
     <div class="warning-note">
         <strong>📊 เอกสารทางบัญชีต้องการความถูกต้อง 100%</strong><br>
-        ระบบจะแจ้งเตือนคำที่ขาดหายไปทันที หากความแม่นยำต่ำกว่า 100% เพื่อให้พนักงานตรวจสอบด้วยตาเปล่าในจุดที่ AI อาจอ่านผิดพลาด
+        ระบบจะแจ้งเตือนคำที่ขาดหายไป พร้อมแสดงข้อมูลที่ถูกต้องจากฐานข้อมูล เพื่อให้พนักงานตรวจสอบด้วยตาเปล่าในจุดที่ AI อาจอ่านผิดพลาด
     </div>
     
     <div class="form-group">
@@ -555,11 +555,9 @@
             function analyzeMatch(dbText, ocrText) {
                 if (!dbText) return { score: 1.0, missingWords: [] };
                 
-                // แปลง 0->o, 1,i,l->1 แต่คงช่องว่างไว้เพื่อแยกคำ
                 let normDb = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1il]/g, '1').replace(/[^a-z0-9ก-๙]/g, ' ');
                 let words = normDb.split(/\s+/).filter(w => w.length > 1);
                 
-                // OCR แปลงแบบเอาช่องว่างออกหมดเพื่อความแม่นยำในการค้นหา
                 let ocrNoSpaces = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1il]/g, '1').replace(/[^a-z0-9ก-๙]/g, '');
                 
                 if (words.length === 0) {
@@ -572,7 +570,6 @@
 
                 let matchCount = 0;
                 let missing = [];
-                // คำต้นฉบับเอาไว้แสดงให้ User ดู
                 let originalWords = dbText.replace(/[^a-zA-Z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
 
                 words.forEach((w, index) => {
@@ -597,15 +594,37 @@
             let addressAnalysis = analyzeMatch(addressToMatch, detectedText);
 
             let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
-            let allMissingWords = [...companyAnalysis.missingWords, ...addressAnalysis.missingWords];
 
-            // สร้าง HTML สำหรับแสดงคำที่ AI มองไม่เห็น
+            // สร้าง HTML แสดงข้อมูลอ้างอิงเทียบกับคำที่หาไม่เจอ
+            let missingDetailsHtml = '';
+            
+            if (companyAnalysis.missingWords.length > 0) {
+                missingDetailsHtml += `
+                    <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #ccc;">
+                        <strong style="color: #2c3e50;">🏢 ชื่อบริษัทที่ถูกต้อง (จากระบบ):</strong><br>
+                        <span style="color: #555; font-size: 13px;">${companyNameToMatch}</span><br>
+                        <strong style="color: #e74c3c; margin-top: 5px; display: block;">❌ AI หาคำเหล่านี้บนเอกสารไม่พบ:</strong>
+                        <span style="color: #c0392b; font-weight: bold; font-size: 13px;">"${companyAnalysis.missingWords.join(', ')}"</span>
+                    </div>
+                `;
+            }
+            
+            if (addressAnalysis.missingWords.length > 0) {
+                missingDetailsHtml += `
+                    <div>
+                        <strong style="color: #2c3e50;">📍 ที่อยู่ที่ถูกต้อง (จากระบบ):</strong><br>
+                        <span style="color: #555; font-size: 13px;">${addressToMatch}</span><br>
+                        <strong style="color: #e74c3c; margin-top: 5px; display: block;">❌ AI หาคำเหล่านี้บนเอกสารไม่พบ:</strong>
+                        <span style="color: #c0392b; font-weight: bold; font-size: 13px;">"${addressAnalysis.missingWords.join(', ')}"</span>
+                    </div>
+                `;
+            }
+
             let missingWordsHtml = '';
-            if (allMissingWords.length > 0) {
+            if (missingDetailsHtml !== '') {
                 missingWordsHtml = `
-                <div style="margin-top: 10px; padding: 10px; background: #fff; border: 1px dashed #ccc; border-radius: 6px; text-align: left; font-size: 13px;">
-                    <strong>🔍 จุดที่ AI ตรวจไม่พบ (โปรดเช็คบนเอกสาร):</strong><br>
-                    <span style="color:#e74c3c;">"${allMissingWords.join(', ')}"</span>
+                <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px dashed #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">
+                    ${missingDetailsHtml}
                 </div>`;
             }
 
@@ -614,7 +633,7 @@
                 let taxErrorHtml = `
                 <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
                     <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
-                    • หาเลขนี้ไม่เจอ: <span style="font-weight:bold;">${taxIdToMatch}</span>
+                    • หาเลขนี้บนเอกสารไม่พบ: <span style="font-weight:bold;">${taxIdToMatch}</span>
                 </div>`;
                 Swal.fire({
                     icon: 'error',
@@ -641,9 +660,9 @@
                 Swal.fire({
                     icon: 'info',
                     title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
-                    html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่มีบางคำตกหล่น</div>
+                    html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>
                            ${missingWordsHtml}
-                           <div style="font-size: 14px; margin-top:10px; color:#555;">กรุณาตรวจสอบจุดที่หายไปว่าพิมพ์ผิดหรือมีรอยเปื้อนหรือไม่</div>` + amountWarningHtml,
+                           <div style="font-size: 14px; margin-top:10px; color:#555;">🔍 โปรดเทียบคำที่หายไปกับเอกสารจริงด้วยตาเปล่าอีกครั้ง</div>` + amountWarningHtml,
                     confirmButtonColor: '#3498db',
                     confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
@@ -656,25 +675,20 @@
                     title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
                     html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>
                            ${missingWordsHtml}
-                           <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด เอกสารอาจไม่ใช่ของสาขานี้</div>` + amountWarningHtml,
+                           <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! ระวังเลือกข้อมูลผิดสาขา</div>` + amountWarningHtml,
                     confirmButtonColor: '#f39c12',
                     confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
 
             } else {
-                // ต่ำกว่า 80% ตกทันที
+                // ต่ำกว่า 80% ตกทันที แสดงกล่องแบบเดียวกันให้ดูว่าอะไรหายไปบ้าง
                 let accuracyPercent = Math.round(lowestScore * 100);
-                let failDetailsHtml = `
-                <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height:1.5;">
-                    <strong>❌ ข้อมูลบัญชีมีความถูกต้องต่ำเกินไป (${accuracyPercent}%)</strong><br>
-                    • ชื่อบริษัทในระบบ: ${companyNameToMatch}<br>
-                    • ที่อยู่บางส่วนในระบบ: ${addressToMatch.substring(0, 40)}...
-                </div>`;
 
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ผ่านเกณฑ์!',
-                    html: '<div style="font-size: 15px;">คะแนนความแม่นยำต่ำกว่า 80% ระบบไม่อนุมัติให้ผ่าน</div>' + failDetailsHtml + amountWarningHtml,
+                    html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) ระบบไม่อนุมัติให้ผ่าน</div>
+                           ${missingWordsHtml}` + amountWarningHtml,
                     confirmButtonColor: '#e74c3c',
                     confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
                 });
