@@ -5,118 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบตรวจสอบข้อมูลและอัปโหลดเอกสาร</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .data-section {
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #fafafa;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        @media (max-width: 600px) {
-            .info-grid { grid-template-columns: 1fr; }
-        }
-        .info-item label {
-            font-weight: bold;
-            color: #7f8c8d;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .info-item span {
-            display: block;
-            padding: 10px;
-            background: #fff;
-            border: 1px solid #dcdde1;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        .upload-section {
-            text-align: center;
-            border: 2px dashed #3498db;
-            padding: 30px;
-            border-radius: 8px;
-            background-color: #ecf0f1;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-        .upload-section:hover {
-            background-color: #e2e8f0;
-        }
-        input[type="file"] {
-            display: none;
-        }
-        button {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background-color: #27ae60;
-        }
-        #preview {
-            max-width: 100%;
-            max-height: 300px;
-            margin-top: 15px;
-            border-radius: 6px;
-            display: none;
-        }
-        .selector-box {
-            margin-bottom: 20px;
-        }
-        select {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-        .status-msg {
-            text-align: center;
-            font-weight: bold;
-            margin-top: 15px;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        .data-section { margin-bottom: 30px; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background-color: #fafafa; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+        .info-item label { font-weight: bold; color: #7f8c8d; display: block; margin-bottom: 5px; }
+        .info-item span { display: block; padding: 10px; background: #fff; border: 1px solid #dcdde1; border-radius: 6px; font-size: 16px; word-break: break-word; }
+        .upload-section { text-align: center; border: 2px dashed #3498db; padding: 30px; border-radius: 8px; background-color: #ecf0f1; cursor: pointer; margin-bottom: 20px; }
+        .upload-section:hover { background-color: #e2e8f0; }
+        input[type="file"] { display: none; }
+        button { background-color: #2ecc71; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: background 0.2s; }
+        button:hover { background-color: #27ae60; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        #preview { max-width: 100%; max-height: 300px; margin-top: 15px; border-radius: 6px; display: none; }
+        .selector-box { margin-bottom: 20px; }
+        select { width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; }
+        .status-msg { text-align: center; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ระบบตรวจสอบข้อมูลพนักงานและอัปโหลดเอกสาร</h2>
+    <h2>ระบบตรวจสอบข้อมูลบริษัทและอัปโหลดเอกสาร</h2>
     
     <div class="selector-box">
         <label for="dataSelect" style="font-weight:bold; display:block; margin-bottom:8px;">เลือกข้อมูลที่ต้องการตรวจสอบ:</label>
         <select id="dataSelect" onchange="displaySelectedData()">
-            <option value="">-- กำลังโหลดข้อมูลจาก Google Sheet --</option>
+            <option value="">-- กำลังโหลดข้อมูล --</option>
         </select>
     </div>
 
@@ -139,27 +56,22 @@
 </div>
 
 <script>
-    // สตรีมลิงก์ Web App จาก Google Apps Script ของคุณ
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
-    
     let globalData = [];
 
-    // โหลดข้อมูลจาก Google Sheet เมื่อเปิดหน้าเว็บ
     window.onload = function() {
-        fetch(`${GAS_WEB_APP_URL}?action=getData`)
+        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Database`)
         .then(response => response.json())
         .then(res => {
             if(res.status === "success") {
                 globalData = res.data;
                 const select = document.getElementById("dataSelect");
-                select.innerHTML = '<option value="">-- เลือกรายการข้อมูล --</option>';
+                select.innerHTML = '<option value="">-- เลือกบริษัทที่ต้องการตรวจสอบ --</option>';
                 
-                // สมมติว่าคอลัมน์แรกใน Sheet เป็น "ชื่อ" หรือ ID ให้ใช้แสดงในตัวเลือก
                 globalData.forEach((item, index) => {
-                    const firstKey = Object.keys(item)[0]; 
                     const option = document.createElement("option");
                     option.value = index;
-                    option.text = item[firstKey] || `รายการที่ ${index + 1}`;
+                    option.text = item["CompanyName"] || `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
                 });
             } else {
@@ -171,31 +83,29 @@
         });
     };
 
-    // แสดงข้อมูลในหน้าจอ (ดึงมาโชว์เฉยๆ พนักงานพิมพ์แก้ไขไม่ได้)
     function displaySelectedData() {
         const selectedIndex = document.getElementById("dataSelect").value;
         const displayDiv = document.getElementById("infoDisplay");
+        const submitBtn = document.getElementById("submitBtn");
         
         if(selectedIndex === "") {
-            displayDiv.innerHTML = '<div class="info-item"><span style="color:#95a5a6;">กรุณาเลือกรายการด้านบนเพื่อเปิดดูข้อมูล</span></div>';
-            document.getElementById("submitBtn").disabled = true;
+            displayDiv.innerHTML = '<div class="info-item"><span style="color:#95a5a6; text-align:center;">กรุณาเลือกรายการด้านบนเพื่อเปิดดูข้อมูล</span></div>';
+            submitBtn.disabled = true;
             return;
         }
 
         const selectedItem = globalData[selectedIndex];
         displayDiv.innerHTML = "";
         
-        // วนลูปแสดงผลทุกคอลัมน์ที่มีใน Google Sheet ตัวนั้นๆ
         for (const [key, value] of Object.entries(selectedItem)) {
             const itemDiv = document.createElement("div");
             itemDiv.className = "info-item";
             itemDiv.innerHTML = `<label>${key}</label><span>${value}</span>`;
             displayDiv.appendChild(itemDiv);
         }
-        document.getElementById("submitBtn").disabled = false;
+        submitBtn.disabled = false;
     }
 
-    // ฟังก์ชันแสดงตัวอย่างภาพเมื่อพนักงานถ่ายรูป
     function previewFile() {
         const file = document.getElementById('fileInput').files[0];
         const preview = document.getElementById('preview');
@@ -214,11 +124,11 @@
         }
     }
 
-    // ฟังก์ชันส่งภาพอัปโหลดไปยัง Google Drive
     function uploadData() {
         const fileInput = document.getElementById('fileInput');
         const selectedIndex = document.getElementById("dataSelect").value;
         const statusDiv = document.getElementById('status');
+        const submitBtn = document.getElementById("submitBtn");
         
         if (fileInput.files.length === 0) {
             alert("กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนส่ง");
@@ -232,7 +142,7 @@
 
         statusDiv.style.color = "orange";
         statusDiv.innerText = "⏳ กำลังอัปโหลดและประมวลผลข้อมูล กรุณารอสักครู่...";
-        document.getElementById("submitBtn").disabled = true;
+        submitBtn.disabled = true;
 
         const file = fileInput.files[0];
         const reader = new FileReader();
@@ -244,7 +154,7 @@
                 file: base64Str,
                 filename: file.name,
                 mimeType: file.type,
-                checkInfo: globalData[selectedIndex] // แนบข้อมูลที่ตรวจสอบไปด้วย
+                checkInfo: globalData[selectedIndex]
             };
 
             fetch(GAS_WEB_APP_URL, {
@@ -257,7 +167,7 @@
                     statusDiv.style.color = "green";
                     statusDiv.innerText = "✅ " + result.message;
                     alert("ตรวจสอบข้อมูลและส่งไฟล์เรียบร้อยแล้ว!");
-                    //รีเซ็ตหน้าจอหลังทำงานเสร็จ
+                    
                     fileInput.value = "";
                     document.getElementById('preview').style.display = "none";
                     document.getElementById("dataSelect").value = "";
@@ -265,13 +175,13 @@
                 } else {
                     statusDiv.style.color = "red";
                     statusDiv.innerText = "❌ เกิดข้อผิดพลาด: " + result.message;
-                    document.getElementById("submitBtn").disabled = false;
+                    submitBtn.disabled = false;
                 }
             })
             .catch(err => {
                 statusDiv.style.color = "red";
                 statusDiv.innerText = "❌ เกิดข้อผิดพลาดในการส่งข้อมูล";
-                document.getElementById("submitBtn").disabled = false;
+                submitBtn.disabled = false;
                 console.error(err);
             });
         };
