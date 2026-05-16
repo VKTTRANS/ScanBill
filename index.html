@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจสอบข้อมูลและอัปโหลดเอกสาร</title>
+    <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -22,13 +22,13 @@
         #preview { max-width: 100%; max-height: 300px; margin-top: 15px; border-radius: 6px; display: none; }
         .selector-box { margin-bottom: 20px; }
         select { width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; }
-        .status-msg { text-align: center; font-weight: bold; margin-top: 15px; }
+        .status-msg { text-align: center; font-weight: bold; margin-top: 15px; padding: 10px; border-radius: 6px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ระบบตรวจสอบข้อมูลและอัปโหลดเอกสาร</h2>
+    <h2>ระบบสแกนตรวจสอบเอกสารอัตโนมัติ</h2>
     
     <div class="selector-box">
         <label for="dataSelect" style="font-weight:bold; display:block; margin-bottom:8px;">เลือกข้อมูลที่ต้องการตรวจสอบ:</label>
@@ -38,53 +38,42 @@
     </div>
 
     <div class="data-section">
-        <h3 style="margin-top:0; color:#34495e;">ข้อมูลในระบบ (ห้ามแก้ไข)</h3>
+        <h3 style="margin-top:0; color:#34495e;">ข้อมูลอ้างอิงจากระบบ</h3>
         <div id="infoDisplay" class="info-grid">
-            <div class="info-item"><span style="color:#95a5a6; text-align:center;">กรุณาเลือกรายการด้านบนเพื่อเปิดดูข้อมูล</span></div>
+            <div class="info-item"><span style="color:#95a5a6; text-align:center;">กรุณาเลือกรายการด้านบน</span></div>
         </div>
     </div>
 
-    <h3 style="color:#34495e;">ถ่ายรูปหรือแนบเอกสารเพื่อยืนยัน</h3>
     <div class="upload-section" onclick="document.getElementById('fileInput').click()">
-        <p style="margin:0; color:#2980b9; font-weight:bold;">📷 คลิกเพื่อเปิดกล้องถ่ายรูป หรือ เลือกไฟล์เอกสาร</p>
+        <p style="margin:0; color:#2980b9; font-weight:bold;">📷 ถ่ายรูปหรือแนบเอกสารเพื่อสแกนด้วย AI</p>
         <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="previewFile()">
         <img id="preview" src="" alt="ตัวอย่างรูปถ่าย">
     </div>
 
-    <button id="submitBtn" onclick="uploadData()" disabled>ยืนยันข้อมูลถูกต้องและส่งเอกสาร</button>
+    <button id="submitBtn" onclick="processDocument()" disabled>สแกนตรวจสอบและอัปโหลด</button>
     <div id="status" class="status-msg"></div>
 </div>
 
 <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
+    const VISION_API_KEY = "AIzaSyCF94sfHnkgqpnvILRiIgz4B6ju1KnBbtc";
     let globalData = [];
+    let currentBase64 = "";
 
     window.onload = function() {
-        // ดึงข้อมูลมาจากชีตชื่อ Setting
-        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Setting`)
+        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Database`)
         .then(response => response.json())
         .then(res => {
             if(res.status === "success") {
                 globalData = res.data;
                 const select = document.getElementById("dataSelect");
-                select.innerHTML = '<option value="">-- เลือกรายการที่ต้องการตรวจสอบ --</option>';
+                select.innerHTML = '<option value="">-- เลือกบริษัทที่ต้องการตรวจสอบ --</option>';
                 
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
                     option.value = index;
-                    
-                    // ดึงค่าทุกคอลัมน์ของแถวนั้นๆ ออกมา
-                    const values = Object.values(item);
-                    
-                    // เอาข้อมูลคอลัมน์แรก (ตัวเลขรหัส)
-                    let displayText = values[0]; 
-                    
-                    // ถ้ามีข้อมูลคอลัมน์ที่สอง (ชื่อ) ให้เอามาต่อท้ายด้วยขีดกลาง
-                    if(values.length > 1 && values[1] !== "") {
-                        displayText += " - " + values[1];
-                    }
-                    
-                    option.text = displayText ? displayText : `รายการที่ ${index + 1}`; 
+                    const companyName = item["CompanyName"] || Object.values(item)[0];
+                    option.text = companyName ? companyName : `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
                 });
             } else {
@@ -92,7 +81,7 @@
             }
         }).catch(err => {
             console.error(err);
-            alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบฐานข้อมูล");
         });
     };
 
@@ -102,7 +91,7 @@
         const submitBtn = document.getElementById("submitBtn");
         
         if(selectedIndex === "") {
-            displayDiv.innerHTML = '<div class="info-item"><span style="color:#95a5a6; text-align:center;">กรุณาเลือกรายการด้านบนเพื่อเปิดดูข้อมูล</span></div>';
+            displayDiv.innerHTML = '<div class="info-item"><span style="color:#95a5a6; text-align:center;">กรุณาเลือกรายการด้านบน</span></div>';
             submitBtn.disabled = true;
             return;
         }
@@ -127,6 +116,7 @@
         reader.onloadend = function () {
             preview.src = reader.result;
             preview.style.display = "inline-block";
+            currentBase64 = reader.result.split(',')[1];
         }
 
         if (file) {
@@ -134,71 +124,133 @@
         } else {
             preview.src = "";
             preview.style.display = "none";
+            currentBase64 = "";
         }
     }
 
-    function uploadData() {
+    function updateStatus(message, type) {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerText = message;
+        if(type === "loading") {
+            statusDiv.style.backgroundColor = "#fff3cd";
+            statusDiv.style.color = "#856404";
+            statusDiv.style.border = "1px solid #ffeeba";
+        } else if(type === "success") {
+            statusDiv.style.backgroundColor = "#d4edda";
+            statusDiv.style.color = "#155724";
+            statusDiv.style.border = "1px solid #c3e6cb";
+        } else if(type === "error") {
+            statusDiv.style.backgroundColor = "#f8d7da";
+            statusDiv.style.color = "#721c24";
+            statusDiv.style.border = "1px solid #f5c6cb";
+        } else {
+            statusDiv.style.backgroundColor = "transparent";
+            statusDiv.style.color = "#333";
+            statusDiv.style.border = "none";
+        }
+    }
+
+    async function processDocument() {
         const fileInput = document.getElementById('fileInput');
         const selectedIndex = document.getElementById("dataSelect").value;
-        const statusDiv = document.getElementById('status');
         const submitBtn = document.getElementById("submitBtn");
         
-        if (fileInput.files.length === 0) {
+        if (fileInput.files.length === 0 || !currentBase64) {
             alert("กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนส่ง");
             return;
         }
-
         if (selectedIndex === "") {
             alert("กรุณาเลือกข้อมูลเพื่อตรวจสอบก่อน");
             return;
         }
 
-        statusDiv.style.color = "orange";
-        statusDiv.innerText = "⏳ กำลังอัปโหลดและประมวลผลข้อมูล กรุณารอสักครู่...";
+        const selectedItem = globalData[selectedIndex];
+        const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
+        
         submitBtn.disabled = true;
+        updateStatus("⏳ AI กำลังสแกนอ่านข้อความในรูปภาพ...", "loading");
 
-        const file = fileInput.files[0];
-        const reader = new FileReader();
+        const visionPayload = {
+            requests: [
+                {
+                    image: { content: currentBase64 },
+                    features: [{ type: "TEXT_DETECTION" }]
+                }
+            ]
+        };
 
-        reader.onload = function(e) {
-            const base64Str = e.target.result.split(',')[1];
+        try {
+            const visionResponse = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(visionPayload)
+            });
+
+            const visionData = await visionResponse.json();
             
-            const payload = {
-                file: base64Str,
+            if (visionData.responses[0].error) {
+                updateStatus("❌ AI ไม่สามารถอ่านรูปภาพนี้ได้: " + visionData.responses[0].error.message, "error");
+                submitBtn.disabled = false;
+                return;
+            }
+
+            const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
+            const cleanDetectedText = detectedText.replace(/\D/g, '');
+
+            let isMatch = false;
+            
+            if (taxIdToMatch && cleanDetectedText.includes(taxIdToMatch)) {
+                isMatch = true;
+            } else {
+                const companyName = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString().toLowerCase().replace(/\s/g, '') : "";
+                const cleanTextLower = detectedText.toLowerCase().replace(/\s/g, '');
+                
+                if (companyName && cleanTextLower.includes(companyName)) {
+                    isMatch = true;
+                }
+            }
+
+            if (!isMatch) {
+                updateStatus("❌ AI ตรวจสอบแล้ว ข้อมูลในรูปภาพ ไม่ตรง กับฐานข้อมูลที่เลือก", "error");
+                submitBtn.disabled = false;
+                return;
+            }
+
+            updateStatus("✅ ข้อมูลตรงกัน! กำลังอัปโหลดเอกสารเข้าสู่ระบบ...", "loading");
+
+            const file = fileInput.files[0];
+            const uploadPayload = {
+                file: currentBase64,
                 filename: file.name,
-                mimeType: file.type,
-                checkInfo: globalData[selectedIndex]
+                mimeType: file.type
             };
 
-            fetch(GAS_WEB_APP_URL, {
+            const uploadResponse = await fetch(GAS_WEB_APP_URL, {
                 method: "POST",
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(result => {
-                if(result.status === "success") {
-                    statusDiv.style.color = "green";
-                    statusDiv.innerText = "✅ " + result.message;
-                    alert("ตรวจสอบข้อมูลและส่งไฟล์เรียบร้อยแล้ว!");
-                    
+                body: JSON.stringify(uploadPayload)
+            });
+
+            const uploadResult = await uploadResponse.json();
+
+            if(uploadResult.status === "success") {
+                updateStatus("🎉 ตรวจสอบสำเร็จและอัปโหลดเอกสารเรียบร้อยแล้ว!", "success");
+                setTimeout(() => {
                     fileInput.value = "";
                     document.getElementById('preview').style.display = "none";
                     document.getElementById("dataSelect").value = "";
                     displaySelectedData();
-                } else {
-                    statusDiv.style.color = "red";
-                    statusDiv.innerText = "❌ เกิดข้อผิดพลาด: " + result.message;
-                    submitBtn.disabled = false;
-                }
-            })
-            .catch(err => {
-                statusDiv.style.color = "red";
-                statusDiv.innerText = "❌ เกิดข้อผิดพลาดในการส่งข้อมูล";
+                    updateStatus("", "");
+                }, 3000);
+            } else {
+                updateStatus("❌ อัปโหลดล้มเหลว: " + uploadResult.message, "error");
                 submitBtn.disabled = false;
-                console.error(err);
-            });
-        };
-        reader.readAsDataURL(file);
+            }
+
+        } catch (error) {
+            console.error(error);
+            updateStatus("❌ เกิดข้อผิดพลาดในการเชื่อมต่อระบบ", "error");
+            submitBtn.disabled = false;
+        }
     }
 </script>
 
