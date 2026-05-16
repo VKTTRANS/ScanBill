@@ -48,18 +48,18 @@ body {
 label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
 
 /* =========================================
-   สไตล์บังคับหน้าตาของ Select2 
+   แก้ปัญหา Select2 100% (เอา Flexbox ออก)
    ========================================= */
-.select2-container { width: 100% !important; }
+.select2-container {
+    width: 100% !important;
+}
 
-.select2-container .select2-selection--single {
+.select2-container--default .select2-selection--single {
     height: 56px !important;
     border-radius: 14px !important;
     border: 2px solid var(--border-light) !important;
     background-color: #fcfcfc !important;
-    display: flex !important;
-    align-items: center !important;
-    transition: all 0.3s ease !important;
+    /* ห้ามใช้ display: flex เด็ดขาดตรงนี้ */
 }
 
 .select2-container--default.select2-container--open .select2-selection--single {
@@ -68,13 +68,12 @@ label { font-weight: 500; color: var(--text-main); display: block; margin-bottom
     box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1) !important;
 }
 
-.select2-container .select2-selection--single .select2-selection__rendered {
+.select2-container--default .select2-selection--single .select2-selection__rendered {
     font-family: 'Kanit', sans-serif !important;
     font-size: 16px !important;
     color: var(--text-main) !important;
     padding-left: 16px !important;
-    line-height: normal !important;
-    width: 100% !important;
+    line-height: 52px !important; /* ดันข้อความให้อยู่ตรงกลางด้วย line-height แทน */
     text-align: left !important;
 }
 
@@ -85,6 +84,7 @@ label { font-weight: 500; color: var(--text-main); display: block; margin-bottom
 .select2-container--default .select2-selection--single .select2-selection__arrow {
     height: 54px !important;
     right: 12px !important;
+    top: 1px !important;
 }
 
 .select2-dropdown {
@@ -112,7 +112,7 @@ label { font-weight: 500; color: var(--text-main); display: block; margin-bottom
 }
 
 /* =========================================
-   สไตล์ส่วนอื่นๆ
+   ส่วนอื่นๆ ของเว็บ
    ========================================= */
 .data-section { 
     margin-bottom: 30px; border: 1px solid var(--border-light); 
