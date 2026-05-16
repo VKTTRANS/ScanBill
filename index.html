@@ -314,7 +314,7 @@
 
     <div class="warning-note">
         <strong>📊 เอกสารทางบัญชีต้องการความถูกต้อง 100%</strong><br>
-        ระบบจะแจ้งเตือนคำที่ขาดหายไป พร้อมแสดงข้อมูลที่ถูกต้องจากฐานข้อมูล เพื่อให้พนักงานตรวจสอบด้วยตาเปล่าในจุดที่ AI อาจอ่านผิดพลาด
+        ระบบจะแจ้งเตือนคำที่ขาดหายไป พร้อมแสดงข้อความดิบจากบิล เพื่อให้พนักงานตรวจสอบด้วยตาเปล่าในจุดที่อาจมีข้อมูลเพี้ยนหรือตกหล่น
     </div>
     
     <div class="form-group">
@@ -595,7 +595,7 @@
 
             let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
 
-            // สร้าง HTML แสดงข้อมูลอ้างอิงเทียบกับคำที่หาไม่เจอ
+            // สร้าง HTML แสดงข้อมูลอ้างอิง และเพิ่มส่วนข้อความที่ AI อ่านได้
             let missingDetailsHtml = '';
             
             if (companyAnalysis.missingWords.length > 0) {
@@ -625,6 +625,12 @@
                 missingWordsHtml = `
                 <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px dashed #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">
                     ${missingDetailsHtml}
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #e0e0e0;">
+                        <strong style="color: #34495e; font-size: 13px;">👁️ ข้อความที่ AI อ่านได้จากรูปภาพ (ใช้สำหรับเทียบคำผิด):</strong><br>
+                        <div style="color: #7f8c8d; font-size: 12px; max-height: 80px; overflow-y: auto; background: #fff; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
+                            ${detectedText.replace(/\n/g, ' ')}
+                        </div>
+                    </div>
                 </div>`;
             }
 
@@ -662,7 +668,7 @@
                     title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
                     html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>
                            ${missingWordsHtml}
-                           <div style="font-size: 14px; margin-top:10px; color:#555;">🔍 โปรดเทียบคำที่หายไปกับเอกสารจริงด้วยตาเปล่าอีกครั้ง</div>` + amountWarningHtml,
+                           <div style="font-size: 14px; margin-top:10px; color:#555;">🔍 โปรดเทียบข้อความดิบที่ AI อ่านได้ด้านบน เพื่อหาจุดที่พิมพ์ผิด</div>` + amountWarningHtml,
                     confirmButtonColor: '#3498db',
                     confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
