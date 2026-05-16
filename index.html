@@ -570,11 +570,39 @@
                 </div>`;
             }
 
-            // ฟังก์ชันวิเคราะห์คำ และตรวจสอบ "กฎเหล็กเรื่องตัวเลข" 
+            // ฟังก์ชันค้นหาประโยคที่ AI อ่านมาได้แล้วคล้ายกับฐานข้อมูลมากที่สุด (เพื่อใช้เปรียบเทียบ)
+            function findBestSnippet(dbText, ocrText) {
+                if (!dbText) return "";
+                const ocrLines = ocrText.split('\n');
+                let bestSnippet = "";
+                let maxScore = -1;
+                const targetWords = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+
+                for (let i = 0; i < ocrLines.length; i++) {
+                    let l1 = ocrLines[i];
+                    let l2 = l1 + (ocrLines[i+1] ? " " + ocrLines[i+1] : "");
+                    let l3 = l2 + (ocrLines[i+2] ? " " + ocrLines[i+2] : "");
+                    
+                    [l1, l2, l3].forEach(snippet => {
+                        let snippetNorm = snippet.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
+                        let score = 0;
+                        targetWords.forEach(tw => {
+                            if (snippetNorm.includes(tw)) score++;
+                        });
+                        // หักคะแนนความยาวเพื่อป้องกันการดึงประโยคมายาวเกินความจำเป็น
+                        let finalScore = score - (snippet.length * 0.005);
+                        if (finalScore > maxScore && score > 0) {
+                            maxScore = finalScore;
+                            bestSnippet = snippet;
+                        }
+                    });
+                }
+                return bestSnippet.replace(/\s+/g, ' ').trim();
+            }
+
             function analyzeMatch(dbText, ocrText) {
-                if (!dbText) return { score: 1.0, missingWords: [] };
+                if (!dbText) return { score: 1.0, bestSnippet: "" };
                 
-                let missing = [];
                 let matchCount = 0;
                 let hasNumberMismatch = false;
 
@@ -588,7 +616,6 @@
                     if (ocrNumbers.includes(num)) {
                         matchCount++;
                     } else {
-                        missing.push(num);
                         hasNumberMismatch = true;
                     }
                 });
@@ -601,8 +628,6 @@
                 dbWords.forEach(w => {
                     if (ocrLettersNorm.includes(w)) {
                         matchCount++;
-                    } else {
-                        missing.push(w.toUpperCase());
                     }
                 });
 
@@ -613,7 +638,9 @@
                     finalScore = 0.79;
                 }
 
-                return { score: finalScore, missingWords: missing };
+                let snippet = findBestSnippet(dbText, ocrText);
+
+                return { score: finalScore, bestSnippet: snippet };
             }
 
             // 1. ตรวจสอบ TaxID
@@ -628,27 +655,29 @@
 
             let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
 
-            // สร้าง HTML แสดงข้อมูลอ้างอิงและคำที่ขาดหาย
+            // สร้าง HTML กล่องเปรียบเทียบข้อผิดพลาด (Before vs After)
             let missingDetailsHtml = '';
             
-            if (companyAnalysis.missingWords.length > 0) {
+            if (companyAnalysis.score < 1.0 && companyNameToMatch) {
                 missingDetailsHtml += `
                     <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #ccc;">
-                        <strong style="color: #2c3e50;">🏢 ชื่อบริษัทที่ถูกต้อง (จากระบบ):</strong><br>
-                        <span style="color: #555; font-size: 13px;">${companyNameToMatch}</span><br>
-                        <strong style="color: #e74c3c; margin-top: 5px; display: block;">❌ AI หาคำเหล่านี้บนเอกสารไม่พบ:</strong>
-                        <span style="color: #c0392b; font-weight: bold; font-size: 13px;">"${companyAnalysis.missingWords.join(', ')}"</span>
+                        <strong style="color: #2c3e50;">🏢 จุดที่พบปัญหา (ชื่อบริษัท):</strong><br>
+                        <div style="background: #fdf2e9; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 13px;">
+                            <span style="color: #7f8c8d;">ในระบบ:</span> <span style="color: #e74c3c; text-decoration: line-through;">${companyNameToMatch}</span><br>
+                            <span style="color: #7f8c8d; margin-top: 4px; display: inline-block;">AI อ่านได้:</span> <span style="color: #d35400; font-weight: bold;">${companyAnalysis.bestSnippet || 'ไม่พบข้อความที่ใกล้เคียง'}</span>
+                        </div>
                     </div>
                 `;
             }
             
-            if (addressAnalysis.missingWords.length > 0) {
+            if (addressAnalysis.score < 1.0 && addressToMatch) {
                 missingDetailsHtml += `
                     <div>
-                        <strong style="color: #2c3e50;">📍 ที่อยู่ที่ถูกต้อง (จากระบบ):</strong><br>
-                        <span style="color: #555; font-size: 13px;">${addressToMatch}</span><br>
-                        <strong style="color: #e74c3c; margin-top: 5px; display: block;">❌ AI หาคำเหล่านี้บนเอกสารไม่พบ:</strong>
-                        <span style="color: #c0392b; font-weight: bold; font-size: 13px;">"${addressAnalysis.missingWords.join(', ')}"</span>
+                        <strong style="color: #2c3e50;">📍 จุดที่พบปัญหา (ที่อยู่):</strong><br>
+                        <div style="background: #fdf2e9; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 13px;">
+                            <span style="color: #7f8c8d;">ในระบบ:</span> <span style="color: #e74c3c; text-decoration: line-through;">${addressToMatch}</span><br>
+                            <span style="color: #7f8c8d; margin-top: 4px; display: inline-block;">AI อ่านได้:</span> <span style="color: #d35400; font-weight: bold;">${addressAnalysis.bestSnippet || 'ไม่พบข้อความที่ใกล้เคียง'}</span>
+                        </div>
                     </div>
                 `;
             }
@@ -656,14 +685,8 @@
             let missingWordsHtml = '';
             if (missingDetailsHtml !== '') {
                 missingWordsHtml = `
-                <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px dashed #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">
+                <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">
                     ${missingDetailsHtml}
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
-                        <strong style="color: #2c3e50; font-size: 13px;">📄 ข้อความที่ AI สแกนได้จากเอกสาร (เพื่อเทียบคำผิด):</strong><br>
-                        <div style="color: #7f8c8d; font-size: 12px; max-height: 60px; overflow-y: auto; background: #fff; padding: 6px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
-                            ${detectedText.replace(/\n/g, ' ')}
-                        </div>
-                    </div>
                 </div>`;
             }
 
