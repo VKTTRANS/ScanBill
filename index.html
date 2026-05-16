@@ -4,48 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
-        .data-section { margin-bottom: 30px; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background-color: #fafafa; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
-        .info-item label { font-weight: bold; color: #7f8c8d; display: block; margin-bottom: 5px; }
-        .info-item span { display: block; padding: 10px; background: #fff; border: 1px solid #dcdde1; border-radius: 6px; font-size: 16px; word-break: break-word; }
-        .upload-section { text-align: center; border: 2px dashed #3498db; padding: 30px; border-radius: 8px; background-color: #ecf0f1; cursor: pointer; margin-bottom: 20px; }
-        .upload-section:hover { background-color: #e2e8f0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            padding: 15px; 
+            color: #333; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 25px 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08); 
+        }
+        h2 { 
+            color: #1a73e8; 
+            text-align: center; 
+            margin-top: 0;
+            margin-bottom: 25px; 
+            font-size: 22px;
+        }
+        .data-section { 
+            margin-bottom: 25px; 
+            border: 1px solid #e0e0e0; 
+            padding: 15px; 
+            border-radius: 12px; 
+            background-color: #f8f9fa; 
+        }
+        h3 {
+            margin-top: 0; 
+            color: #425161; 
+            font-size: 18px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin-top: 15px;
+        }
+        @media (max-width: 600px) { 
+            .info-grid { grid-template-columns: 1fr; } 
+            .container { padding: 20px 15px; }
+        }
+        .info-item label { 
+            font-weight: 600; 
+            color: #5f6368; 
+            display: block; 
+            margin-bottom: 6px; 
+            font-size: 14px;
+        }
+        .info-item span { 
+            display: block; 
+            padding: 12px; 
+            background: #fff; 
+            border: 1px solid #dadce0; 
+            border-radius: 8px; 
+            font-size: 15px; 
+            word-break: break-word; 
+            color: #202124;
+        }
+        .upload-section { 
+            text-align: center; 
+            border: 2px dashed #1a73e8; 
+            padding: 30px 15px; 
+            border-radius: 12px; 
+            background-color: #e8f0fe; 
+            cursor: pointer; 
+            margin-bottom: 25px; 
+            transition: all 0.3s ease;
+        }
+        .upload-section:active { 
+            background-color: #d2e3fc; 
+            transform: scale(0.98);
+        }
+        .upload-text {
+            margin: 0; 
+            color: #1a73e8; 
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .upload-subtext {
+            margin: 8px 0 0 0;
+            font-size: 13px;
+            color: #5f6368;
+        }
         input[type="file"] { display: none; }
-        button { background-color: #2ecc71; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: background 0.2s; }
-        button:hover { background-color: #27ae60; }
-        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
-        #preview { max-width: 100%; max-height: 300px; margin-top: 15px; border-radius: 6px; display: none; }
-        .selector-box { margin-bottom: 20px; }
-        select { width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; }
-        .status-msg { text-align: center; font-weight: bold; margin-top: 15px; padding: 10px; border-radius: 6px; }
+        button { 
+            background-color: #1a73e8; 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            font-size: 18px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-weight: bold; 
+            transition: background 0.3s; 
+            box-shadow: 0 4px 6px rgba(26, 115, 232, 0.3);
+        }
+        button:hover { background-color: #1557b0; }
+        button:disabled { 
+            background-color: #bdc3c7; 
+            box-shadow: none;
+            cursor: not-allowed; 
+        }
+        #preview { 
+            max-width: 100%; 
+            max-height: 250px; 
+            margin-top: 15px; 
+            border-radius: 8px; 
+            display: none; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .selector-box { margin-bottom: 25px; }
+        select { 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 16px; 
+            border-radius: 10px; 
+            border: 1px solid #dadce0; 
+            background-color: #fff;
+            color: #333;
+            outline: none;
+        }
+        select:focus { border-color: #1a73e8; }
+        .status-msg { 
+            text-align: center; 
+            font-weight: bold; 
+            margin-top: 20px; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ระบบสแกนตรวจสอบเอกสารอัตโนมัติ</h2>
+    <h2>🤖 ระบบสแกนเอกสารด้วย AI</h2>
     
     <div class="selector-box">
-        <label for="dataSelect" style="font-weight:bold; display:block; margin-bottom:8px;">เลือกข้อมูลที่ต้องการตรวจสอบ:</label>
+        <label for="dataSelect" style="font-weight:bold; display:block; margin-bottom:10px; color:#425161;">1. เลือกข้อมูลอ้างอิง:</label>
         <select id="dataSelect" onchange="displaySelectedData()">
-            <option value="">-- กำลังโหลดข้อมูล --</option>
+            <option value="">-- กำลังโหลดข้อมูลจากระบบ --</option>
         </select>
     </div>
 
     <div class="data-section">
-        <h3 style="margin-top:0; color:#34495e;">ข้อมูลอ้างอิงจากระบบ</h3>
+        <h3>ข้อมูลในฐานระบบ</h3>
         <div id="infoDisplay" class="info-grid">
-            <div class="info-item"><span style="color:#95a5a6; text-align:center;">กรุณาเลือกรายการด้านบน</span></div>
+            <div class="info-item" style="grid-column: 1 / -1; text-align: center;">
+                <span style="color:#95a5a6; border: none; background: transparent;">กรุณาเลือกรายการด้านบน</span>
+            </div>
         </div>
     </div>
 
     <div class="upload-section" onclick="document.getElementById('fileInput').click()">
-        <p style="margin:0; color:#2980b9; font-weight:bold;">📷 ถ่ายรูปหรือแนบเอกสารเพื่อสแกนด้วย AI</p>
+        <p class="upload-text">📸 แตะเพื่อถ่ายรูป หรือ เลือกไฟล์เอกสาร</p>
+        <p class="upload-subtext">ระบบ AI จะช่วยอ่านข้อความให้คุณอัตโนมัติ</p>
         <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="previewFile()">
         <img id="preview" src="" alt="ตัวอย่างรูปถ่าย">
     </div>
@@ -67,7 +190,7 @@
             if(res.status === "success") {
                 globalData = res.data;
                 const select = document.getElementById("dataSelect");
-                select.innerHTML = '<option value="">-- เลือกรายการที่ต้องการตรวจสอบ --</option>';
+                select.innerHTML = '<option value="">-- แตะเพื่อเลือกบริษัท --</option>';
                 
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
@@ -83,11 +206,11 @@
                     select.appendChild(option);
                 });
             } else {
-                alert("ไม่สามารถดึงข้อมูลจาก Sheet ได้: " + res.message);
+                Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถดึงข้อมูลจาก Sheet ได้', 'error');
             }
         }).catch(err => {
             console.error(err);
-            alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบฐานข้อมูล");
+            Swal.fire('การเชื่อมต่อล้มเหลว', 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบฐานข้อมูล', 'error');
         });
     };
 
@@ -97,7 +220,7 @@
         const submitBtn = document.getElementById("submitBtn");
         
         if(selectedIndex === "") {
-            displayDiv.innerHTML = '<div class="info-item"><span style="color:#95a5a6; text-align:center;">กรุณาเลือกรายการด้านบน</span></div>';
+            displayDiv.innerHTML = '<div class="info-item" style="grid-column: 1 / -1; text-align: center;"><span style="color:#95a5a6; border: none; background: transparent;">กรุณาเลือกรายการด้านบน</span></div>';
             submitBtn.disabled = true;
             return;
         }
@@ -137,22 +260,14 @@
     function updateStatus(message, type) {
         const statusDiv = document.getElementById('status');
         statusDiv.innerText = message;
+        statusDiv.style.display = "block";
+        
         if(type === "loading") {
             statusDiv.style.backgroundColor = "#fff3cd";
             statusDiv.style.color = "#856404";
             statusDiv.style.border = "1px solid #ffeeba";
-        } else if(type === "success") {
-            statusDiv.style.backgroundColor = "#d4edda";
-            statusDiv.style.color = "#155724";
-            statusDiv.style.border = "1px solid #c3e6cb";
-        } else if(type === "error") {
-            statusDiv.style.backgroundColor = "#f8d7da";
-            statusDiv.style.color = "#721c24";
-            statusDiv.style.border = "1px solid #f5c6cb";
         } else {
-            statusDiv.style.backgroundColor = "transparent";
-            statusDiv.style.color = "#333";
-            statusDiv.style.border = "none";
+            statusDiv.style.display = "none";
         }
     }
 
@@ -162,21 +277,19 @@
         const submitBtn = document.getElementById("submitBtn");
         
         if (fileInput.files.length === 0 || !currentBase64) {
-            alert("กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนส่ง");
+            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนสแกน' });
             return;
         }
         if (selectedIndex === "") {
-            alert("กรุณาเลือกข้อมูลเพื่อตรวจสอบก่อน");
+            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกข้อมูลที่ต้องการตรวจสอบก่อน' });
             return;
         }
 
         const selectedItem = globalData[selectedIndex];
-        
-        // ดึงเฉพาะตัวเลขจาก TaxID ถ้ามี
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         
         submitBtn.disabled = true;
-        updateStatus("⏳ AI กำลังสแกนอ่านข้อความในรูปภาพ...", "loading");
+        updateStatus("⏳ AI กำลังสแกนและวิเคราะห์รูปภาพ...", "loading");
 
         const visionPayload = {
             requests: [
@@ -197,53 +310,59 @@
             const visionData = await visionResponse.json();
             
             if (visionData.responses[0].error) {
-                updateStatus("❌ AI ไม่สามารถอ่านรูปภาพนี้ได้", "error");
-                alert("ข้อผิดพลาด: " + visionData.responses[0].error.message);
+                updateStatus("", "");
+                Swal.fire('ข้อผิดพลาด AI', visionData.responses[0].error.message, 'error');
                 submitBtn.disabled = false;
                 return;
             }
 
             const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
-            const cleanDetectedText = detectedText.replace(/\D/g, ''); // เอาเฉพาะตัวเลขจากข้อความที่สแกนได้
+            const cleanDetectedText = detectedText.replace(/\D/g, '');
 
             let isMatch = false;
             
-            // 1. ตรวจสอบจากเลข TaxID ก่อน (แม่นยำที่สุด)
             if (taxIdToMatch && cleanDetectedText.includes(taxIdToMatch)) {
                 isMatch = true;
             } else {
-                // 2. ถ้า TaxID ไม่ตรง ลองตรวจสอบจากชื่อบริษัท (ตัดช่องว่างและทำตัวเล็กทั้งหมด)
                 const companyName = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString().toLowerCase().replace(/\s/g, '') : "";
                 const cleanTextLower = detectedText.toLowerCase().replace(/\s/g, '');
-                
                 if (companyName && cleanTextLower.includes(companyName)) {
                     isMatch = true;
                 }
             }
 
-            // แสดงผลลัพธ์
+            updateStatus("", ""); // ปิดข้อความโหลด
+
             if (!isMatch) {
-                updateStatus("❌ ข้อมูลในรูปภาพ ไม่ตรง กับฐานข้อมูล", "error");
-                alert("⚠️ AI ตรวจสอบแล้วพบว่า ข้อมูลบนเอกสาร ไม่ตรง กับฐานข้อมูลที่เลือก กรุณาตรวจสอบอีกครั้ง!");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ข้อมูลไม่ตรงกัน!',
+                    text: '⚠️ ข้อมูลบนเอกสาร ไม่ตรง กับฐานข้อมูลที่เลือก กรุณาตรวจสอบอีกครั้ง',
+                    confirmButtonColor: '#e74c3c',
+                    confirmButtonText: 'ตกลง'
+                });
                 submitBtn.disabled = false;
             } else {
-                updateStatus("✅ ข้อมูลถูกต้องตรงกัน!", "success");
-                alert("🎉 ข้อมูลถูกต้อง! เอกสารนี้ตรงกับฐานข้อมูลในระบบครับ");
-                
-                // รีเซ็ตหน้าจอเตรียมสแกนใบถัดไป
-                setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ข้อมูลถูกต้อง!',
+                    text: '🎉 ข้อมูลบนเอกสารตรงกับฐานข้อมูลในระบบ',
+                    confirmButtonColor: '#2ecc71',
+                    confirmButtonText: 'รับทราบ',
+                    timer: 3000
+                }).then(() => {
                     fileInput.value = "";
                     document.getElementById('preview').style.display = "none";
                     document.getElementById("dataSelect").value = "";
                     displaySelectedData();
-                    updateStatus("", "");
                     submitBtn.disabled = false;
-                }, 2000);
+                });
             }
 
         } catch (error) {
             console.error(error);
-            updateStatus("❌ เกิดข้อผิดพลาดในการเชื่อมต่อระบบ", "error");
+            updateStatus("", "");
+            Swal.fire('การเชื่อมต่อล้มเหลว', 'เกิดข้อผิดพลาดในการส่งข้อมูลไปที่ AI', 'error');
             submitBtn.disabled = false;
         }
     }
