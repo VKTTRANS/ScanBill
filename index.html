@@ -495,7 +495,6 @@
 
         const selectedItem = globalData[selectedIndex];
         
-        // ดึงข้อมูลทั้ง 3 อย่างมาเตรียมไว้ตรวจสอบ
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
         const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
@@ -537,11 +536,9 @@
 
             const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
             
-            // เตรียม Text ไว้ 2 แบบ แบบเอาแค่ตัวเลข กับแบบตัดสเปซ/เครื่องหมายวรรคตอนออกหมด
             const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
-            const cleanDetectedTextNoPunctuation = detectedText.toLowerCase().replace(/[\s\(\)\.,-]/g, '');
+            const cleanDetectedTextNoPunctuation = detectedText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
 
-            // 1. ตรวจหายอดเงินในบิล
             const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
             let maxAmount = 0;
             if (moneyMatches) {
@@ -563,24 +560,21 @@
                 </div>`;
             }
 
-            // 2. ตรวจสอบความตรงกัน (โหมดเข้มงวด: ต้องเจอครบทุกอย่างที่มีในฐานข้อมูล)
-            let isMatch = true; // สมมติว่าถูกไว้ก่อน แล้วหาจุดจับผิด
+            let isMatch = true;
             let foundTaxId = false;
             let foundCompanyName = false;
             let foundAddress = false;
 
-            // เช็ค TaxID
             if (taxIdToMatch) {
                 if (cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
                     foundTaxId = true;
                 } else {
-                    isMatch = false; // ถ้ามีในระบบแต่หาบนบิลไม่เจอ ถือว่าตกทันที
+                    isMatch = false;
                 }
             }
             
-            // เช็คชื่อบริษัท (ลบช่องว่างและเครื่องหมายออกก่อนเทียบ)
             if (companyNameToMatch) {
-                const companyNameStrictLower = companyNameToMatch.toLowerCase().replace(/[\s\(\)\.,-]/g, '');
+                const companyNameStrictLower = companyNameToMatch.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
                 if (cleanDetectedTextNoPunctuation.includes(companyNameStrictLower)) {
                     foundCompanyName = true;
                 } else {
@@ -588,9 +582,8 @@
                 }
             }
 
-            // เช็คที่อยู่ (ลบช่องว่างและเครื่องหมายออกก่อนเทียบ)
             if (addressToMatch) {
-                const addressStrictLower = addressToMatch.toLowerCase().replace(/[\s\(\)\.,-]/g, '');
+                const addressStrictLower = addressToMatch.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
                 if (cleanDetectedTextNoPunctuation.includes(addressStrictLower)) {
                     foundAddress = true;
                 } else {
@@ -598,12 +591,10 @@
                 }
             }
 
-            // กันเหนียว: ถ้าฐานข้อมูลว่างเปล่าเลยทั้ง 3 ช่อง ให้ถือว่าไม่ผ่าน
             if (!taxIdToMatch && !companyNameToMatch && !addressToMatch) {
                 isMatch = false;
             }
 
-            // 3. แสดงผลลัพธ์
             if (!isMatch) {
                 let errorDetailsHtml = `
                 <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height: 1.5;">
