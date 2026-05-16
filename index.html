@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
@@ -105,10 +104,10 @@
 
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
-                    option.value = index;
+                    // แก้บั๊กไม้ตายที่ 1: บังคับให้ value เป็น String เสมอ เพื่อไม่ให้ Select2 สับสนกับค่า 0 (False)
+                    option.value = "company_" + index; 
                     const values = Object.values(item);
-                    let displayText = values[0]; 
-                    option.text = displayText ? displayText : `รายการที่ ${index + 1}`; 
+                    option.text = values[0] || `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
                 });
 
@@ -129,9 +128,7 @@
                         }
                     });
 
-                    $('#dataSelect').addClass('select2-ready');
                     $('#dataSelect').off('change').on('change', function() { displaySelectedData(); });
-                    
                     $('#dataSelect').val(null).trigger('change');
 
                     if (isRefresh) {
@@ -155,16 +152,18 @@
     };
 
     function displaySelectedData() {
-        const selectedIndex = $('#dataSelect').val(); 
+        const selectedValue = $('#dataSelect').val(); 
         const displayDiv = document.getElementById("infoDisplay");
         const submitBtn = document.getElementById("submitBtn");
         
-        if(!selectedIndex || selectedIndex === "") {
+        if(!selectedValue) {
             displayDiv.innerHTML = '<div class="info-item" style="grid-column: 1 / -1; text-align: center; padding: 20px 0;"><span style="color:#a0aec0; border: none; background: transparent; box-shadow: none;">กรุณาเลือกรายการด้านบนเพื่อแสดงรายละเอียด</span></div>';
             submitBtn.disabled = true;
             return;
         }
 
+        // แปลง String กลับเป็น Index ตัวเลข
+        const selectedIndex = parseInt(selectedValue.replace("company_", ""));
         const selectedItem = globalData[selectedIndex];
         displayDiv.innerHTML = "";
         
@@ -182,7 +181,7 @@
         const files = inputElement.files;
         const previewContainer = document.getElementById('previewContainer');
         const submitBtn = document.getElementById("submitBtn");
-        const selectedIndex = $('#dataSelect').val();
+        const selectedValue = $('#dataSelect').val();
         
         previewContainer.innerHTML = ""; 
         currentBase64Array = [];
@@ -204,7 +203,7 @@
                     
                     currentBase64Array.push(reader.result.split(',')[1]);
                     
-                    if (selectedIndex && selectedIndex !== "") { 
+                    if (selectedValue) { 
                         submitBtn.disabled = false; 
                     }
                 }
@@ -235,19 +234,21 @@
     }
 
     async function processDocument() {
-        const selectedIndex = $('#dataSelect').val();
+        const selectedValue = $('#dataSelect').val();
         const submitBtn = document.getElementById("submitBtn");
         
         if (currentBase64Array.length === 0) {
             Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนสแกน', confirmButtonColor: '#4361ee' });
             return;
         }
-        if (!selectedIndex || selectedIndex === "") {
+        if (!selectedValue) {
             Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกระเบียนข้อมูลที่ต้องการตรวจสอบก่อน', confirmButtonColor: '#4361ee' });
             return;
         }
 
+        const selectedIndex = parseInt(selectedValue.replace("company_", ""));
         const selectedItem = globalData[selectedIndex];
+        
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
         const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
