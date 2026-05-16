@@ -313,11 +313,8 @@
     </div>
 
     <div class="warning-note">
-        <strong>📊 ลอจิกการตรวจสอบแบบขั้นบันได (Multi-stage):</strong><br>
-        • <strong>ความแม่นยำ 100%:</strong> ผ่านฉลุย ไม่ต้องตรวจสอบซ้ำ<br>
-        • <strong>ความแม่นยำ 90% - 99%:</strong> ผ่านชั่วคราว (กรุณาตรวจสอบให้ละเอียดอีกครั้ง)<br>
-        • <strong>ความแม่นยำ 80% - 89%:</strong> ผ่านชั่วคราว (กรุณาตรวจสอบโดยละเอียดที่สุด)<br>
-        • <strong>ต่ำกว่า 80% หรือ TaxID ไม่ตรง:</strong> ปรับตกทันที ต้องให้พนักงานตรวจสอบเอง
+        <strong>📊 เอกสารทางบัญชีต้องการความถูกต้อง 100%</strong><br>
+        ระบบจะแจ้งเตือนคำที่ขาดหายไปทันที หากความแม่นยำต่ำกว่า 100% เพื่อให้พนักงานตรวจสอบด้วยตาเปล่าในจุดที่ AI อาจอ่านผิดพลาด
     </div>
     
     <div class="form-group">
@@ -508,7 +505,7 @@
         
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอย่างละเอียด',
+            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบเอกสารทางบัญชี',
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading() }
         });
@@ -534,7 +531,7 @@
             const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
             const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
 
-            // ตรวจหายอดเงินสุทธิในบิล
+            // ตรวจหายอดเงิน
             const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
             let maxAmount = 0;
             if (moneyMatches) {
@@ -554,48 +551,71 @@
                 </div>`;
             }
 
-            // ------------------------------------------------------------------
-            // ลอจิกคำนวณคะแนนตามสัดส่วนคำศัพท์ (Fuzzy Math Logic)
-            // ------------------------------------------------------------------
-            function getMatchScore(dbText, ocrText) {
-                if (!dbText) return 0;
-                const cleanStr = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
-                const words = cleanStr.split(/\s+/).filter(w => w.length > 1);
+            // ฟังก์ชันวิเคราะห์หาคำที่หายไป พร้อมคำนวณคะแนน
+            function analyzeMatch(dbText, ocrText) {
+                if (!dbText) return { score: 1.0, missingWords: [] };
+                
+                // แปลง 0->o, 1,i,l->1 แต่คงช่องว่างไว้เพื่อแยกคำ
+                let normDb = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1il]/g, '1').replace(/[^a-z0-9ก-๙]/g, ' ');
+                let words = normDb.split(/\s+/).filter(w => w.length > 1);
+                
+                // OCR แปลงแบบเอาช่องว่างออกหมดเพื่อความแม่นยำในการค้นหา
+                let ocrNoSpaces = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1il]/g, '1').replace(/[^a-z0-9ก-๙]/g, '');
                 
                 if (words.length === 0) {
-                    const strictDb = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-                    const strictOcr = ocrText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-                    return strictOcr.includes(strictDb) ? 1.0 : 0;
+                    let strictDb = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
+                    return { 
+                        score: ocrNoSpaces.includes(strictDb) ? 1.0 : 0, 
+                        missingWords: ocrNoSpaces.includes(strictDb) ? [] : [dbText] 
+                    };
                 }
-                
-                const lowerOcr = ocrText.toLowerCase();
+
                 let matchCount = 0;
-                words.forEach(w => { if (lowerOcr.includes(w)) { matchCount++; } });
-                return matchCount / words.length;
+                let missing = [];
+                // คำต้นฉบับเอาไว้แสดงให้ User ดู
+                let originalWords = dbText.replace(/[^a-zA-Z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+
+                words.forEach((w, index) => {
+                    if (ocrNoSpaces.includes(w)) {
+                        matchCount++;
+                    } else {
+                        missing.push(originalWords[index] || w);
+                    }
+                });
+
+                return { score: matchCount / words.length, missingWords: missing };
             }
 
-            // 1. ตรวจสอบ TaxID (ตัวเลข 13 หลัก บังคับตรง 100% เท่านั้น ห้ามผ่านขั้นบันได)
+            // 1. ตรวจสอบ TaxID
             let taxIdPassed = true;
             if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
                 taxIdPassed = false;
             }
 
-            // 2. คำนวณคะแนนของ ชื่อ และ ที่อยู่
-            let companyScore = companyNameToMatch ? getMatchScore(companyNameToMatch, detectedText) : 1.0;
-            let addressScore = addressToMatch ? getMatchScore(addressToMatch, detectedText) : 1.0;
+            // 2. วิเคราะห์ชื่อและที่อยู่
+            let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText);
+            let addressAnalysis = analyzeMatch(addressToMatch, detectedText);
 
-            // หาคะแนนเฉลี่ยที่ต่ำที่สุดระหว่าง ชื่อ และ ที่อยู่ เพื่อเอามาตัดเกรดขั้นบันได
-            let lowestScore = Math.min(companyScore, addressScore);
+            let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
+            let allMissingWords = [...companyAnalysis.missingWords, ...addressAnalysis.missingWords];
 
-            // 3. แสดงผลลัพธ์แบบขั้นบันได (Multi-stage Alert)
+            // สร้าง HTML สำหรับแสดงคำที่ AI มองไม่เห็น
+            let missingWordsHtml = '';
+            if (allMissingWords.length > 0) {
+                missingWordsHtml = `
+                <div style="margin-top: 10px; padding: 10px; background: #fff; border: 1px dashed #ccc; border-radius: 6px; text-align: left; font-size: 13px;">
+                    <strong>🔍 จุดที่ AI ตรวจไม่พบ (โปรดเช็คบนเอกสาร):</strong><br>
+                    <span style="color:#e74c3c;">"${allMissingWords.join(', ')}"</span>
+                </div>`;
+            }
+
+            // 3. แสดงผลลัพธ์
             if (!taxIdPassed) {
-                // เคสที่ 1: เลขผู้เสียภาษีไม่ตรง ปรับตกทันที ไม่คิดคะแนนตัวอื่น
                 let taxErrorHtml = `
                 <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
-                    <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรงกับระบบ</strong><br>
-                    • เลขในระบบคือ: <span style="text-decoration: underline; font-weight:bold;">${taxIdToMatch}</span>
+                    <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
+                    • หาเลขนี้ไม่เจอ: <span style="font-weight:bold;">${taxIdToMatch}</span>
                 </div>`;
-
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ตรงกัน!',
@@ -606,45 +626,47 @@
                 submitBtn.disabled = false;
 
             } else if (lowestScore === 1.0) {
-                // เคสที่ 2: ตรงเป๊ะ 100% (ไฟเขียวผ่านฉลุย)
+                // 100% ผ่านฉลุย
                 Swal.fire({
                     icon: 'success',
-                    title: 'ถูกต้องครบถ้วน!',
-                    html: '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ตรวจผ่าน 100% ข้อมูลตรงกับระบบทั้งหมด</div>' + amountWarningHtml,
+                    title: 'ถูกต้องครบถ้วน 100%!',
+                    html: '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ข้อมูลบัญชีตรงกับระบบเป๊ะทุกตัวอักษร</div>' + amountWarningHtml,
                     confirmButtonColor: '#2ecc71',
                     confirmButtonText: 'ตกลง'
                 }).then(() => { resetForm(); });
 
             } else if (lowestScore >= 0.90) {
-                // เคสที่ 3: ตรงช่วง 90% - 99% (ไฟน้ำเงิน เตือนแบบเบา)
+                // 90% ขึ้นไป ให้คำแนะนำ
                 let accuracyPercent = Math.round(lowestScore * 100);
                 Swal.fire({
                     icon: 'info',
-                    title: 'ตรวจสอบผ่าน 90% ขึ้นไป',
-                    html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ตรวจพบข้อมูลถูกต้องประมาณ ${accuracyPercent}%</div>
-                           <div style="font-size: 14px; margin-top:5px; color:#555;">🔍 กรุณาตรวจสอบให้ละเอียดอีกครั้งก่อนบันทึก</div>` + amountWarningHtml,
+                    title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
+                    html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่มีบางคำตกหล่น</div>
+                           ${missingWordsHtml}
+                           <div style="font-size: 14px; margin-top:10px; color:#555;">กรุณาตรวจสอบจุดที่หายไปว่าพิมพ์ผิดหรือมีรอยเปื้อนหรือไม่</div>` + amountWarningHtml,
                     confirmButtonColor: '#3498db',
-                    confirmButtonText: 'ผ่าน (ยืนยันตรวจสอบแล้ว)'
+                    confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
 
             } else if (lowestScore >= 0.80) {
-                // เคสที่ 4: ตรงช่วง 80% - 89% (ไฟส้ม เตือนเข้มงวด)
+                // 80% ขึ้นไป เตือนหนักขึ้น
                 let accuracyPercent = Math.round(lowestScore * 100);
                 Swal.fire({
                     icon: 'warning',
-                    title: 'ตรวจสอบผ่าน 80% ขึ้นไป',
-                    html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องประมาณ ${accuracyPercent}%</div>
-                           <div style="font-size: 14px; margin-top:5px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! เอกสารอาจมีความเพี้ยน</div>` + amountWarningHtml,
+                    title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
+                    html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>
+                           ${missingWordsHtml}
+                           <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด เอกสารอาจไม่ใช่ของสาขานี้</div>` + amountWarningHtml,
                     confirmButtonColor: '#f39c12',
-                    confirmButtonText: 'ผ่าน (ยืนยันตรวจละเอียดแล้ว)'
+                    confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
                 }).then(() => { resetForm(); });
 
             } else {
-                // เคสที่ 5: ต่ำกว่า 80% ปรับตกทันที เด้งสีแดง บังคับเช็คเอง
+                // ต่ำกว่า 80% ตกทันที
                 let accuracyPercent = Math.round(lowestScore * 100);
                 let failDetailsHtml = `
                 <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height:1.5;">
-                    <strong>❌ ข้อมูลมีความถูกต้องต่ำเกินไป (${accuracyPercent}%)</strong><br>
+                    <strong>❌ ข้อมูลบัญชีมีความถูกต้องต่ำเกินไป (${accuracyPercent}%)</strong><br>
                     • ชื่อบริษัทในระบบ: ${companyNameToMatch}<br>
                     • ที่อยู่บางส่วนในระบบ: ${addressToMatch.substring(0, 40)}...
                 </div>`;
@@ -652,7 +674,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ผ่านเกณฑ์!',
-                    html: '<div style="font-size: 15px;">คะแนนความแม่นยำต่ำกว่า 80% ระบบไม่สามารถให้อนุมัติผ่านได้</div>' + failDetailsHtml + amountWarningHtml,
+                    html: '<div style="font-size: 15px;">คะแนนความแม่นยำต่ำกว่า 80% ระบบไม่อนุมัติให้ผ่าน</div>' + failDetailsHtml + amountWarningHtml,
                     confirmButtonColor: '#e74c3c',
                     confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
                 });
