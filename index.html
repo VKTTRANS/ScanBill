@@ -62,37 +62,37 @@
         .form-group { margin-bottom: 25px; }
         label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
 
-        /* =========================================
-           CSS ของ Select2 (แก้ปัญหาชื่อหาย + รองรับมือถือ 100%)
-           ========================================= */
         .select2-container { width: 100% !important; }
         
         .select2-container--default .select2-selection--single {
-            height: 56px !important; /* บังคับความสูงตายตัว */
-            border-radius: 14px;
-            border: 2px solid var(--border-light);
-            background-color: #fcfcfc;
-            transition: all 0.3s ease;
+            height: 56px !important;
+            border-radius: 14px !important;
+            border: 2px solid var(--border-light) !important;
+            background-color: #fcfcfc !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 16px !important;
             position: relative;
+            transition: all 0.3s ease;
         }
 
         .select2-container--default.select2-container--open .select2-selection--single {
-            border-color: var(--primary);
-            background-color: #fff;
+            border-color: var(--primary) !important;
+            background-color: #fff !important;
             box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
         }
 
         .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding: 0 !important;
+            line-height: normal !important;
+            font-size: 16px !important;
             font-family: 'Kanit', sans-serif;
-            font-size: 16px;
             color: var(--text-main) !important;
-            line-height: 52px !important; /* ดันให้อยู่กึ่งกลางพอดีเป๊ะ */
-            padding-left: 16px !important;
-            padding-right: 60px !important; /* เว้นที่ด้านขวาเยอะหน่อย กันข้อความทับปุ่ม X และลูกศร */
-            display: block;
-            white-space: nowrap !important; /* บังคับบรรทัดเดียว ห้ามตกบรรทัด */
-            overflow: hidden !important; 
-            text-overflow: ellipsis !important; /* ถ้าชื่อยาวเกินให้ตัดเป็น ... */
+            width: 100%;
+            padding-right: 40px !important;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__placeholder {
@@ -100,22 +100,22 @@
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 54px !important;
-            position: absolute;
-            top: 0;
-            right: 12px;
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            right: 16px !important;
+            height: auto !important;
         }
 
-        /* แก้ปุ่มกากบาท (Clear) ให้อยู่ถูกที่และคลิกง่าย */
         .select2-container--default .select2-selection--single .select2-selection__clear {
             position: absolute !important;
-            right: 35px !important; /* ให้อยู่ซ้ายของลูกศร */
-            top: 0 !important;
-            height: 56px !important;
-            line-height: 56px !important;
+            right: 40px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
             margin: 0 !important;
             color: #e74c3c !important;
-            font-size: 22px !important;
+            font-size: 20px !important;
+            font-weight: bold;
             z-index: 10;
         }
 
@@ -125,12 +125,12 @@
             border-radius: 12px;
             box-shadow: var(--shadow-md);
             overflow: hidden;
-            z-index: 9999; /* กันเมนูไปซ่อนหลัง element อื่นบนมือถือ */
+            z-index: 9999;
         }
 
         .select2-search__field {
             font-family: 'Kanit', sans-serif;
-            font-size: 16px !important; /* บังคับ 16px ป้องกันปัญหา iOS ซูมจอเอง */
+            font-size: 16px !important;
             border-radius: 8px !important;
             padding: 10px !important;
         }
