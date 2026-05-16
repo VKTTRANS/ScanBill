@@ -63,7 +63,7 @@
         label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
 
         /* =========================================
-           CSS Select2 (เวอร์ชั่นแก้บั๊กแสดงผล + รองรับมือถือ)
+           CSS Select2 (ดีไซน์คลีนๆ ไม่บั๊ก 100%)
            ========================================= */
         .select2-container { 
             width: 100% !important; 
@@ -86,16 +86,16 @@
 
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             display: block !important;
-            line-height: 52px !important; /* จัดกึ่งกลางแนวตั้ง */
+            line-height: 52px !important;
             padding-left: 16px !important;
-            padding-right: 40px !important; /* เว้นที่ให้ลูกศรและปุ่มกากบาท */
+            padding-right: 40px !important;
             font-family: 'Kanit', sans-serif !important;
             font-size: 16px !important;
             color: var(--text-main) !important;
             text-align: left !important;
             white-space: nowrap !important;
             overflow: hidden !important;
-            text-overflow: ellipsis !important; /* ตัดคำที่ยาวเกินด้วย ... */
+            text-overflow: ellipsis !important;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__placeholder {
@@ -212,7 +212,6 @@
     <div class="form-group">
         <label for="dataSelect">1. พิมพ์ค้นหา หรือ เลือกระเบียนข้อมูล</label>
         <select id="dataSelect" disabled>
-            <option value=""></option>
         </select>
     </div>
 
@@ -274,29 +273,26 @@
         .then(res => {
             if(res.status === "success") {
                 globalData = res.data;
-                
-                // ไม่ต้องใส่ {id: '', text: ''} แล้ว เพราะเราบังคับ <option value=""> ไว้ใน HTML แล้ว
-                const select2Data = []; 
-                globalData.forEach((item, index) => {
-                    select2Data.push({
-                        id: index.toString(),
-                        text: Object.values(item)[0] || `รายการที่ ${index + 1}`
-                    });
-                });
 
                 $(document).ready(function() {
                     const $select = $('#dataSelect');
                     
+                    // 1. ล้างคราบ Select2 ตัวเก่าทิ้งให้หมด
                     if ($select.hasClass("select2-hidden-accessible")) {
                         $select.select2('destroy');
                     }
-                    $select.empty(); 
                     
-                    // บังคับยัด Option ว่างเข้าไปก่อน เพื่อแก้บั๊ก Placeholder กวนใจ
-                    $select.append('<option value=""></option>');
-                    
+                    // 2. สร้างโครง HTML ดิบๆ แทนการยัด Array JSON (แก้บั๊กชื่อไม่โชว์ 100%)
+                    $select.empty();
+                    $select.append('<option value=""></option>'); // สร้าง Option ว่างสำหรับ Placeholder
+
+                    globalData.forEach((item, index) => {
+                        const companyName = Object.values(item)[0] || `รายการที่ ${index + 1}`;
+                        $select.append(`<option value="${index}">${companyName}</option>`);
+                    });
+
+                    // 3. ปลุกเสก Select2 ทับลงไป
                     $select.select2({
-                        data: select2Data, 
                         placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
                         allowClear: true,
                         width: '100%',
@@ -305,6 +301,7 @@
                         }
                     });
 
+                    // 4. ผูก Event ปกติ
                     $select.prop('disabled', false); 
                     $select.off('change').on('change', function() { displaySelectedData(); });
                     
