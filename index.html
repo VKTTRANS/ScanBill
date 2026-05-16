@@ -360,7 +360,6 @@
     let currentBase64 = "";
 
     window.onload = function() {
-        // แสดง Popup โหลดข้อมูลทันทีที่เปิดหน้าเว็บ
         Swal.fire({
             title: 'กำลังเชื่อมต่อระบบ...',
             text: 'กำลังดึงฐานข้อมูลบริษัท กรุณารอสักครู่',
@@ -388,7 +387,7 @@
                 });
 
                 $(document).ready(function() {
-                    $('#dataSelect').prop('disabled', false); // ปลดล็อกกล่องเมื่อโหลดเสร็จ
+                    $('#dataSelect').prop('disabled', false); 
                     $('#dataSelect').select2({
                         placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
                         allowClear: true,
@@ -406,7 +405,6 @@
                         displaySelectedData();
                     });
                     
-                    // ปิด Popup โหลดข้อมูล
                     Swal.close();
                 });
 
@@ -497,12 +495,13 @@
 
         const selectedItem = globalData[selectedIndex];
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
+        const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
         
         submitBtn.disabled = true;
         
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: 'กรุณารอสักครู่ ระบบกำลังแยกแยะตัวอักษรและตัวเลข',
+            html: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบเอกสาร',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading()
@@ -536,22 +535,18 @@
             const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
             const cleanDetectedText = detectedText.replace(/\D/g, '');
 
-            // ---------------------------------------------------------
-            // ฟังก์ชันใหม่: ตรวจหายอดเงินในบิล (ค้นหาตัวเลขที่มีคอมม่าหรือทศนิยม)
-            // ---------------------------------------------------------
+            // 1. ตรวจหายอดเงินในบิล
             const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
             let maxAmount = 0;
             if (moneyMatches) {
                 moneyMatches.forEach(m => {
                     const val = parseFloat(m.replace(/,/g, ''));
-                    // หาค่าตัวเลขที่มากที่สุดในบิล (มักจะเป็นยอดรวมสุทธิ)
                     if (val > maxAmount) {
                         maxAmount = val;
                     }
                 });
             }
 
-            // สร้างกล่องข้อความเตือนเรื่อง หัก ณ ที่จ่าย ถ้ายอดรวม >= 1070
             let amountWarningHtml = '';
             if (maxAmount >= 1070) {
                 amountWarningHtml = `
@@ -561,25 +556,38 @@
                     <span style="font-weight:600;">📌 ต้องออกใบหัก ณ ที่จ่าย (กรุณาตรวจสอบกับเจ้าของงานอีกครั้ง)</span>
                 </div>`;
             }
-            // ---------------------------------------------------------
 
+            // 2. ตรวจสอบความตรงกัน
             let isMatch = false;
-            
+            let foundTaxId = false;
+            let foundCompanyName = false;
+
             if (taxIdToMatch && cleanDetectedText.includes(taxIdToMatch)) {
+                foundTaxId = true;
                 isMatch = true;
-            } else {
-                const companyName = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString().toLowerCase().replace(/\s/g, '') : "";
-                const cleanTextLower = detectedText.toLowerCase().replace(/\s/g, '');
-                if (companyName && cleanTextLower.includes(companyName)) {
-                    isMatch = true;
-                }
+            }
+            
+            const cleanTextLower = detectedText.toLowerCase().replace(/\s/g, '');
+            const companyNameLower = companyNameToMatch.toLowerCase().replace(/\s/g, '');
+            if (companyNameLower && cleanTextLower.includes(companyNameLower)) {
+                foundCompanyName = true;
+                isMatch = true;
             }
 
+            // 3. แสดงผลลัพธ์
             if (!isMatch) {
+                // สร้างกล่องข้อความบอก "จุดที่ผิด"
+                let errorDetailsHtml = `
+                <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px; line-height: 1.5;">
+                    <strong>❌ ไม่พบข้อมูลต่อไปนี้ในเอกสาร:</strong><br>
+                    ${taxIdToMatch ? `• เลขผู้เสียภาษี: ${taxIdToMatch}<br>` : ''}
+                    ${companyNameToMatch ? `• ชื่อบริษัท: ${companyNameToMatch}` : ''}
+                </div>`;
+
                 Swal.fire({
                     icon: 'error',
                     title: 'ข้อมูลไม่ตรงกัน!',
-                    html: 'ตรวจพบว่าข้อมูลบนเอกสาร ไม่ตรง กับฐานข้อมูลในระบบ กรุณาตรวจสอบอีกครั้ง' + amountWarningHtml,
+                    html: '<div style="font-size: 15px;">ตรวจพบว่าข้อมูลบนเอกสาร ไม่ตรง กับฐานข้อมูลในระบบ</div>' + errorDetailsHtml + amountWarningHtml,
                     confirmButtonColor: '#e74c3c',
                     confirmButtonText: 'รับทราบ'
                 });
@@ -588,7 +596,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'ถูกต้องครบถ้วน!',
-                    html: 'ข้อมูลบนเอกสารตรงกับระบบ' + amountWarningHtml,
+                    html: '<div style="font-size: 15px;">ข้อมูลบนเอกสารตรงกับระบบเรียบร้อยแล้ว</div>' + amountWarningHtml,
                     confirmButtonColor: '#2ecc71',
                     confirmButtonText: 'ตกลง'
                 }).then(() => {
