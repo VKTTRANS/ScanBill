@@ -77,60 +77,65 @@ label {
     opacity: 1 !important;
 }
 
-/* แก้ไขบั๊กตัวหนังสือล่องหนของ Select2 ตรงนี้ครับ */
+/* =========================================
+   สไตล์สำหรับกล่องเลือกบริษัท (Select2)
+   ========================================= */
 .select2-container--default .select2-selection--single {
-    height: 56px;
-    border-radius: 14px;
-    border: 2px solid var(--border-light);
-    background-color: #fcfcfc;
-    transition: all 0.3s ease;
+    height: 56px !important;
+    border-radius: 14px !important;
+    border: 2px solid var(--border-light) !important;
+    background-color: #fcfcfc !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.3s ease !important;
 }
 
 .select2-container--default.select2-container--open .select2-selection--single {
-    border-color: var(--primary);
-    background-color: #fff;
-    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+    border-color: var(--primary) !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1) !important;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__rendered {
-    font-family: 'Kanit', sans-serif;
-    font-size: 16px;
-    color: var(--text-main);
-    padding-left: 16px;
-    line-height: 52px; /* ใช้ line-height จัดให้อยู่กึ่งกลางแทน flexbox */
+    font-family: 'Kanit', sans-serif !important;
+    font-size: 16px !important;
+    color: var(--text-main) !important;
+    padding-left: 16px !important;
+    line-height: normal !important;
+    width: 100% !important;
+    text-align: left !important;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__placeholder {
-    color: #999;
+    color: #999 !important;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 54px;
-    right: 12px;
-    top: 1px;
+    height: 54px !important;
+    right: 12px !important;
 }
 
 .select2-dropdown {
-    font-family: 'Kanit', sans-serif;
-    border: 2px solid var(--primary);
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
+    font-family: 'Kanit', sans-serif !important;
+    border: 2px solid var(--primary) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-md) !important;
+    overflow: hidden !important;
 }
 
 .select2-search__field {
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Kanit', sans-serif !important;
     border-radius: 8px !important;
     padding: 10px !important;
 }
 
 .select2-results__option {
-    padding: 12px 16px;
-    font-size: 15px;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-    background-color: var(--primary);
+    background-color: var(--primary) !important;
 }
 
 .data-section { 
