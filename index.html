@@ -28,7 +28,7 @@
 <body>
 
 <div class="container">
-    <h2>ระบบตรวจสอบข้อมูลบริษัทและอัปโหลดเอกสาร</h2>
+    <h2>ระบบตรวจสอบข้อมูลและอัปโหลดเอกสาร</h2>
     
     <div class="selector-box">
         <label for="dataSelect" style="font-weight:bold; display:block; margin-bottom:8px;">เลือกข้อมูลที่ต้องการตรวจสอบ:</label>
@@ -59,24 +59,32 @@
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
     let globalData = [];
 
-window.onload = function() {
-        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Database`)
+    window.onload = function() {
+        // ดึงข้อมูลมาจากชีตชื่อ Setting
+        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Setting`)
         .then(response => response.json())
         .then(res => {
             if(res.status === "success") {
                 globalData = res.data;
                 const select = document.getElementById("dataSelect");
-                select.innerHTML = '<option value="">-- เลือกบริษัทที่ต้องการตรวจสอบ --</option>';
+                select.innerHTML = '<option value="">-- เลือกรายการที่ต้องการตรวจสอบ --</option>';
                 
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
                     option.value = index;
                     
-                    // ดึงข้อมูลจาก "คอลัมน์แรกสุด" ของ Sheet (คอลัมน์ A) มาแสดงเสมอ
-                    // วิธีนี้จะหมดปัญหาเรื่องตั้งชื่อหัวคอลัมน์ไม่ตรง
-                    const companyName = Object.values(item)[0];
+                    // ดึงค่าทุกคอลัมน์ของแถวนั้นๆ ออกมา
+                    const values = Object.values(item);
                     
-                    option.text = companyName ? companyName : `รายการที่ ${index + 1}`; 
+                    // เอาข้อมูลคอลัมน์แรก (ตัวเลขรหัส)
+                    let displayText = values[0]; 
+                    
+                    // ถ้ามีข้อมูลคอลัมน์ที่สอง (ชื่อ) ให้เอามาต่อท้ายด้วยขีดกลาง
+                    if(values.length > 1 && values[1] !== "") {
+                        displayText += " - " + values[1];
+                    }
+                    
+                    option.text = displayText ? displayText : `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
                 });
             } else {
@@ -105,7 +113,7 @@ window.onload = function() {
         for (const [key, value] of Object.entries(selectedItem)) {
             const itemDiv = document.createElement("div");
             itemDiv.className = "info-item";
-            itemDiv.innerHTML = `<label>${key}</label><span>${value}</span>`;
+            itemDiv.innerHTML = `<label>${key}</label><span>${value || '-'}</span>`;
             displayDiv.appendChild(itemDiv);
         }
         submitBtn.disabled = false;
