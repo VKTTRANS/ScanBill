@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
     
+    <link rel="icon" href="data:,">
+    
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -104,8 +106,7 @@
 
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
-                    // แก้บั๊กไม้ตายที่ 1: บังคับให้ value เป็น String เสมอ เพื่อไม่ให้ Select2 สับสนกับค่า 0 (False)
-                    option.value = "company_" + index; 
+                    option.value = index; 
                     const values = Object.values(item);
                     option.text = values[0] || `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
@@ -122,12 +123,11 @@
                         allowClear: true,
                         width: '100%',
                         language: {
-                            noResults: function() {
-                                return "ไม่พบข้อมูลที่ค้นหา";
-                            }
+                            noResults: function() { return "ไม่พบข้อมูลที่ค้นหา"; }
                         }
                     });
 
+                    $('#dataSelect').addClass('select2-ready');
                     $('#dataSelect').off('change').on('change', function() { displaySelectedData(); });
                     $('#dataSelect').val(null).trigger('change');
 
@@ -147,9 +147,7 @@
         });
     }
 
-    window.onload = function() {
-        fetchDataFromSheet(false);
-    };
+    window.onload = function() { fetchDataFromSheet(false); };
 
     function displaySelectedData() {
         const selectedValue = $('#dataSelect').val(); 
@@ -162,8 +160,7 @@
             return;
         }
 
-        // แปลง String กลับเป็น Index ตัวเลข
-        const selectedIndex = parseInt(selectedValue.replace("company_", ""));
+        const selectedIndex = parseInt(selectedValue);
         const selectedItem = globalData[selectedIndex];
         displayDiv.innerHTML = "";
         
@@ -203,9 +200,7 @@
                     
                     currentBase64Array.push(reader.result.split(',')[1]);
                     
-                    if (selectedValue) { 
-                        submitBtn.disabled = false; 
-                    }
+                    if (selectedValue) { submitBtn.disabled = false; }
                 }
                 reader.readAsDataURL(file);
             });
@@ -246,7 +241,7 @@
             return;
         }
 
-        const selectedIndex = parseInt(selectedValue.replace("company_", ""));
+        const selectedIndex = parseInt(selectedValue);
         const selectedItem = globalData[selectedIndex];
         
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
