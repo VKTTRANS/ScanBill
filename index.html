@@ -5,15 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
     
-    <link rel="icon" href="data:,">
-    
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a0ca3;
+            --secondary: #4cc9f0;
+            --bg-color: #f8f9fc;
+            --card-bg: #ffffff;
+            --text-main: #2b2d42;
+            --text-muted: #6c757d;
+            --border-light: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 10px 25px rgba(67, 97, 238, 0.1);
+        }
+
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            padding: 20px 15px; 
+            color: var(--text-main); 
+        }
+
+        .container { 
+            max-width: 700px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            padding: 30px 25px; 
+            border-radius: 24px; 
+            box-shadow: var(--shadow-md); 
+        }
+
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { color: var(--primary); margin: 0 0 8px 0; font-size: 26px; font-weight: 600; }
+        .header p { color: var(--text-muted); margin: 0; font-size: 15px; }
+
+        .warning-note {
+            background-color: #f8f9fc;
+            color: #2c3e50;
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            text-align: left;
+            margin-bottom: 25px;
+            border: 1px solid #dcdde1;
+            line-height: 1.6;
+        }
+
+        .form-group { margin-bottom: 25px; }
+        label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
+
+        /* =========================================
+           สไตล์กล่องค้นหาแบบ Native (ไม่ต้องง้อปลั๊กอิน)
+           ========================================= */
+        .custom-input {
+            width: 100%;
+            height: 56px;
+            border-radius: 14px;
+            border: 2px solid var(--border-light);
+            background-color: #fcfcfc;
+            font-family: 'Kanit', sans-serif;
+            font-size: 16px;
+            color: var(--text-main);
+            padding: 0 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        }
+
+        .custom-input:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        /* =========================================
+           ส่วนแสดงข้อมูลและอัปโหลด
+           ========================================= */
+        .data-section { 
+            margin-bottom: 30px; border: 1px solid var(--border-light); 
+            padding: 20px; border-radius: 16px; background-color: #fafbfc; 
+            animation: fadeIn 0.4s ease-out;
+        }
+        .data-section h3 { margin: 0 0 15px 0; color: var(--text-main); font-size: 17px; display: flex; align-items: center; gap: 8px; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .container { padding: 25px 20px; border-radius: 20px;} }
+
+        .info-item label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+        .info-item span { 
+            display: block; padding: 12px 15px; background: #fff; 
+            border: 1px solid var(--border-light); border-radius: 10px; 
+            font-size: 15px; word-break: break-word; color: var(--text-main); box-shadow: var(--shadow-sm);
+        }
+
+        .upload-container {
+            border: 2px dashed #bcccff; padding: 25px 20px; border-radius: 16px; 
+            background-color: #f4f7ff; margin-bottom: 25px; text-align: center;
+        }
+        .upload-header { margin: 0 0 15px 0; color: var(--primary); font-weight: 500; font-size: 16px; }
+
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .action-btn {
+            background-color: white; border: 1px solid var(--primary); color: var(--primary);
+            padding: 15px; border-radius: 12px; cursor: pointer; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 8px; font-size: 14px; font-weight: 500; transition: all 0.2s ease; box-shadow: var(--shadow-sm);
+        }
+        .action-btn:hover { background-color: var(--primary); color: white; }
+        .action-btn:active { transform: scale(0.96); }
+        .action-btn svg { width: 28px; height: 28px; }
+
+        input[type="file"] { display: none; }
+
+        #previewContainer { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
+        .preview-img { max-width: 100%; max-height: 150px; border-radius: 8px; box-shadow: var(--shadow-sm); object-fit: contain; animation: fadeIn 0.4s ease-out; }
+
+        button.submit-btn { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: white; border: none; padding: 16px; font-size: 18px; font-family: 'Kanit', sans-serif;
+            border-radius: 14px; cursor: pointer; width: 100%; font-weight: 500; transition: all 0.3s; 
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        button.submit-btn:hover { box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4); transform: translateY(-2px); }
+        button.submit-btn:active { transform: translateY(1px); }
+        button.submit-btn:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
 
@@ -29,10 +157,9 @@
     </div>
     
     <div class="form-group">
-        <label for="dataSelect">1. พิมพ์ค้นหา หรือ เลือกระเบียนข้อมูล</label>
-        <select id="dataSelect" disabled>
-            <option value="">กำลังโหลดข้อมูล...</option>
-        </select>
+        <label for="companyInput">1. พิมพ์ค้นหา หรือ เลือกระเบียนข้อมูล</label>
+        <input list="companyList" id="companyInput" class="custom-input" placeholder="-- กำลังโหลดข้อมูล... --" disabled oninput="displaySelectedData()">
+        <datalist id="companyList"></datalist>
     </div>
 
     <div class="data-section">
@@ -87,6 +214,7 @@
     let globalData = [];
     let currentBase64Array = [];
 
+    // โหลดข้อมูลแล้วสร้าง <datalist> ดิบๆ 
     function fetchDataFromSheet(isRefresh = false) {
         Swal.fire({
             title: isRefresh ? 'กำลังอัปเดตข้อมูล...' : 'กำลังเชื่อมต่อระบบ...',
@@ -100,43 +228,28 @@
         .then(res => {
             if(res.status === "success") {
                 globalData = res.data;
-                const select = document.getElementById("dataSelect");
+                const datalist = document.getElementById("companyList");
+                const input = document.getElementById("companyInput");
                 
-                select.innerHTML = '<option value=""></option>';
-
-                globalData.forEach((item, index) => {
+                datalist.innerHTML = ''; // ล้างค่าเก่า
+                
+                globalData.forEach((item) => {
                     const option = document.createElement("option");
-                    option.value = index; 
                     const values = Object.values(item);
-                    option.text = values[0] || `รายการที่ ${index + 1}`; 
-                    select.appendChild(option);
+                    option.value = values[0]; // เอาชื่อบริษัทไปเป็น Value ให้ค้นหาและเลือกได้
+                    datalist.appendChild(option);
                 });
 
-                $(document).ready(function() {
-                    if ($('#dataSelect').hasClass("select2-hidden-accessible")) {
-                        $('#dataSelect').select2('destroy');
-                    }
+                input.placeholder = "-- พิมพ์ค้นหา หรือ เลือกบริษัท --";
+                input.disabled = false; // เปิดให้พิมพ์ได้
 
-                    $('#dataSelect').prop('disabled', false); 
-                    $('#dataSelect').select2({
-                        placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
-                        allowClear: true,
-                        width: '100%',
-                        language: {
-                            noResults: function() { return "ไม่พบข้อมูลที่ค้นหา"; }
-                        }
-                    });
-
-                    $('#dataSelect').addClass('select2-ready');
-                    $('#dataSelect').off('change').on('change', function() { displaySelectedData(); });
-                    $('#dataSelect').val(null).trigger('change');
-
-                    if (isRefresh) {
-                        Swal.fire({icon: 'success', title: 'อัปเดตข้อมูลสำเร็จ!', timer: 1000, showConfirmButton: false});
-                    } else {
-                        Swal.close();
-                    }
-                });
+                if (isRefresh) {
+                    input.value = ""; // รีเซ็ตช่องค้นหา
+                    displaySelectedData();
+                    Swal.fire({icon: 'success', title: 'อัปเดตข้อมูลสำเร็จ!', timer: 1000, showConfirmButton: false});
+                } else {
+                    Swal.close();
+                }
 
             } else {
                 Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถดึงข้อมูลจาก Sheet ได้', 'error');
@@ -150,17 +263,19 @@
     window.onload = function() { fetchDataFromSheet(false); };
 
     function displaySelectedData() {
-        const selectedValue = $('#dataSelect').val(); 
+        const inputValue = document.getElementById('companyInput').value; 
         const displayDiv = document.getElementById("infoDisplay");
         const submitBtn = document.getElementById("submitBtn");
         
-        if(!selectedValue) {
+        // ค้นหา Index ใน globalData ว่าตรงกับบริษัทที่พิมพ์มาไหม
+        const selectedIndex = globalData.findIndex(item => Object.values(item)[0] === inputValue);
+
+        if(selectedIndex === -1 || !inputValue) {
             displayDiv.innerHTML = '<div class="info-item" style="grid-column: 1 / -1; text-align: center; padding: 20px 0;"><span style="color:#a0aec0; border: none; background: transparent; box-shadow: none;">กรุณาเลือกรายการด้านบนเพื่อแสดงรายละเอียด</span></div>';
             submitBtn.disabled = true;
             return;
         }
 
-        const selectedIndex = parseInt(selectedValue);
         const selectedItem = globalData[selectedIndex];
         displayDiv.innerHTML = "";
         
@@ -178,7 +293,10 @@
         const files = inputElement.files;
         const previewContainer = document.getElementById('previewContainer');
         const submitBtn = document.getElementById("submitBtn");
-        const selectedValue = $('#dataSelect').val();
+        
+        // เช็คว่าเลือกบริษัทถูกต้องไว้หรือยัง
+        const inputValue = document.getElementById('companyInput').value; 
+        const selectedIndex = globalData.findIndex(item => Object.values(item)[0] === inputValue);
         
         previewContainer.innerHTML = ""; 
         currentBase64Array = [];
@@ -200,7 +318,7 @@
                     
                     currentBase64Array.push(reader.result.split(',')[1]);
                     
-                    if (selectedValue) { submitBtn.disabled = false; }
+                    if (selectedIndex !== -1) { submitBtn.disabled = false; }
                 }
                 reader.readAsDataURL(file);
             });
@@ -229,21 +347,20 @@
     }
 
     async function processDocument() {
-        const selectedValue = $('#dataSelect').val();
+        const inputValue = document.getElementById('companyInput').value; 
+        const selectedIndex = globalData.findIndex(item => Object.values(item)[0] === inputValue);
         const submitBtn = document.getElementById("submitBtn");
         
         if (currentBase64Array.length === 0) {
             Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนสแกน', confirmButtonColor: '#4361ee' });
             return;
         }
-        if (!selectedValue) {
-            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกระเบียนข้อมูลที่ต้องการตรวจสอบก่อน', confirmButtonColor: '#4361ee' });
+        if (selectedIndex === -1) {
+            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกระเบียนข้อมูลให้ถูกต้องก่อน', confirmButtonColor: '#4361ee' });
             return;
         }
 
-        const selectedIndex = parseInt(selectedValue);
         const selectedItem = globalData[selectedIndex];
-        
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
         const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
