@@ -50,7 +50,7 @@
         <img id="preview" src="" alt="ตัวอย่างรูปถ่าย">
     </div>
 
-    <button id="submitBtn" onclick="processDocument()" disabled>สแกนตรวจสอบและอัปโหลด</button>
+    <button id="submitBtn" onclick="processDocument()" disabled>สแกนและตรวจสอบข้อมูล</button>
     <div id="status" class="status-msg"></div>
 </div>
 
@@ -60,27 +60,21 @@
     let globalData = [];
     let currentBase64 = "";
 
-window.onload = function() {
-        // บังคับดึงข้อมูลจากแท็บ Setting (ตามที่คุณแคปรูปมาล่าสุด)
+    window.onload = function() {
         fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Setting`)
         .then(response => response.json())
         .then(res => {
             if(res.status === "success") {
                 globalData = res.data;
                 const select = document.getElementById("dataSelect");
-                select.innerHTML = '<option value="">-- เลือกบริษัทที่ต้องการตรวจสอบ --</option>';
+                select.innerHTML = '<option value="">-- เลือกรายการที่ต้องการตรวจสอบ --</option>';
                 
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
                     option.value = index;
                     
-                    // ดึงค่าทุกคอลัมน์ของแถวนั้นๆ ออกมา
                     const values = Object.values(item);
-                    
-                    // เอาข้อมูลคอลัมน์แรก (ตัวเลขรหัส)
                     let displayText = values[0]; 
-                    
-                    // ถ้ามีข้อมูลคอลัมน์ที่สอง (ชื่อบริษัท) ให้เอามาต่อท้ายด้วยขีดกลาง
                     if(values.length > 1 && values[1] !== "") {
                         displayText += " - " + values[1];
                     }
@@ -177,6 +171,8 @@ window.onload = function() {
         }
 
         const selectedItem = globalData[selectedIndex];
+        
+        // ดึงเฉพาะตัวเลขจาก TaxID ถ้ามี
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         
         submitBtn.disabled = true;
@@ -201,19 +197,22 @@ window.onload = function() {
             const visionData = await visionResponse.json();
             
             if (visionData.responses[0].error) {
-                updateStatus("❌ AI ไม่สามารถอ่านรูปภาพนี้ได้: " + visionData.responses[0].error.message, "error");
+                updateStatus("❌ AI ไม่สามารถอ่านรูปภาพนี้ได้", "error");
+                alert("ข้อผิดพลาด: " + visionData.responses[0].error.message);
                 submitBtn.disabled = false;
                 return;
             }
 
             const detectedText = visionData.responses[0].fullTextAnnotation ? visionData.responses[0].fullTextAnnotation.text : "";
-            const cleanDetectedText = detectedText.replace(/\D/g, '');
+            const cleanDetectedText = detectedText.replace(/\D/g, ''); // เอาเฉพาะตัวเลขจากข้อความที่สแกนได้
 
             let isMatch = false;
             
+            // 1. ตรวจสอบจากเลข TaxID ก่อน (แม่นยำที่สุด)
             if (taxIdToMatch && cleanDetectedText.includes(taxIdToMatch)) {
                 isMatch = true;
             } else {
+                // 2. ถ้า TaxID ไม่ตรง ลองตรวจสอบจากชื่อบริษัท (ตัดช่องว่างและทำตัวเล็กทั้งหมด)
                 const companyName = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString().toLowerCase().replace(/\s/g, '') : "";
                 const cleanTextLower = detectedText.toLowerCase().replace(/\s/g, '');
                 
@@ -222,40 +221,24 @@ window.onload = function() {
                 }
             }
 
+            // แสดงผลลัพธ์
             if (!isMatch) {
-                updateStatus("❌ AI ตรวจสอบแล้ว ข้อมูลในรูปภาพ ไม่ตรง กับฐานข้อมูลที่เลือก", "error");
+                updateStatus("❌ ข้อมูลในรูปภาพ ไม่ตรง กับฐานข้อมูล", "error");
+                alert("⚠️ AI ตรวจสอบแล้วพบว่า ข้อมูลบนเอกสาร ไม่ตรง กับฐานข้อมูลที่เลือก กรุณาตรวจสอบอีกครั้ง!");
                 submitBtn.disabled = false;
-                return;
-            }
-
-            updateStatus("✅ ข้อมูลตรงกัน! กำลังอัปโหลดเอกสารเข้าสู่ระบบ...", "loading");
-
-            const file = fileInput.files[0];
-            const uploadPayload = {
-                file: currentBase64,
-                filename: file.name,
-                mimeType: file.type
-            };
-
-            const uploadResponse = await fetch(GAS_WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify(uploadPayload)
-            });
-
-            const uploadResult = await uploadResponse.json();
-
-            if(uploadResult.status === "success") {
-                updateStatus("🎉 ตรวจสอบสำเร็จและอัปโหลดเอกสารเรียบร้อยแล้ว!", "success");
+            } else {
+                updateStatus("✅ ข้อมูลถูกต้องตรงกัน!", "success");
+                alert("🎉 ข้อมูลถูกต้อง! เอกสารนี้ตรงกับฐานข้อมูลในระบบครับ");
+                
+                // รีเซ็ตหน้าจอเตรียมสแกนใบถัดไป
                 setTimeout(() => {
                     fileInput.value = "";
                     document.getElementById('preview').style.display = "none";
                     document.getElementById("dataSelect").value = "";
                     displaySelectedData();
                     updateStatus("", "");
-                }, 3000);
-            } else {
-                updateStatus("❌ อัปโหลดล้มเหลว: " + uploadResult.message, "error");
-                submitBtn.disabled = false;
+                    submitBtn.disabled = false;
+                }, 2000);
             }
 
         } catch (error) {
