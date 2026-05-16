@@ -7,8 +7,10 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <style>
         :root {
@@ -376,23 +378,21 @@
                     select.appendChild(option);
                 });
 
-                $(document).ready(function() {
-                    $('#dataSelect').select2({
-                        placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
-                        allowClear: true,
-                        width: '100%',
-                        language: {
-                            noResults: function() {
-                                return "ไม่พบข้อมูลที่ค้นหา";
-                            }
+                $('#dataSelect').select2({
+                    placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
+                    allowClear: true,
+                    width: '100%',
+                    language: {
+                        noResults: function() {
+                            return "ไม่พบข้อมูลที่ค้นหา";
                         }
-                    });
+                    }
+                });
 
-                    $('#dataSelect').addClass('select2-ready');
+                $('#dataSelect').addClass('select2-ready');
 
-                    $('#dataSelect').on('change', function() {
-                        displaySelectedData();
-                    });
+                $('#dataSelect').on('change', function() {
+                    displaySelectedData();
                 });
 
             } else {
