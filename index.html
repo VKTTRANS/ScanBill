@@ -7,7 +7,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     
@@ -70,7 +69,15 @@
             font-size: 15px;
         }
 
-        /* ----- ตกแต่ง Select2 ให้เข้ากับธีม ----- */
+        #dataSelect {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .select2-ready {
+            opacity: 1 !important;
+        }
+
         .select2-container--default .select2-selection--single {
             height: 56px;
             border-radius: 14px;
@@ -80,11 +87,13 @@
             align-items: center;
             transition: all 0.3s ease;
         }
+        
         .select2-container--default.select2-container--open .select2-selection--single {
             border-color: var(--primary);
             background-color: #fff;
             box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
         }
+
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             font-family: 'Kanit', sans-serif;
             font-size: 16px;
@@ -92,13 +101,16 @@
             padding-left: 16px;
             line-height: normal;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__placeholder {
             color: #999;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 54px;
             right: 12px;
         }
+
         .select2-dropdown {
             font-family: 'Kanit', sans-serif;
             border: 2px solid var(--primary);
@@ -106,20 +118,22 @@
             box-shadow: var(--shadow-md);
             overflow: hidden;
         }
+
         .select2-search__field {
             font-family: 'Kanit', sans-serif;
             border-radius: 8px !important;
             padding: 10px !important;
         }
+
         .select2-results__option {
             padding: 12px 16px;
             font-size: 15px;
         }
+
         .select2-container--default .select2-results__option--highlighted[aria-selected] {
             background-color: var(--primary);
         }
 
-        /* ----- ส่วนแสดงข้อมูล ----- */
         .data-section { 
             margin-bottom: 30px; 
             border: 1px solid var(--border-light); 
@@ -143,6 +157,7 @@
             grid-template-columns: 1fr 1fr; 
             gap: 15px; 
         }
+
         @media (max-width: 600px) { 
             .info-grid { grid-template-columns: 1fr; } 
             .container { padding: 25px 20px; border-radius: 20px;}
@@ -153,6 +168,7 @@
             color: var(--text-muted);
             margin-bottom: 6px;
         }
+
         .info-item span { 
             display: block; 
             padding: 12px 15px; 
@@ -165,7 +181,6 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* ----- ส่วนอัปโหลด ----- */
         .upload-container {
             border: 2px dashed #bcccff; 
             padding: 25px 20px; 
@@ -200,9 +215,8 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            font-family: 'Kanit', sans-serif;
-            font-weight: 500;
             font-size: 14px;
+            font-weight: 500;
             transition: all 0.2s ease;
             box-shadow: var(--shadow-sm);
         }
@@ -236,7 +250,6 @@
             margin-right: auto;
         }
 
-        /* ----- ปุ่มสแกน ----- */
         button.submit-btn { 
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
             color: white; 
@@ -255,13 +268,16 @@
             justify-content: center;
             gap: 10px;
         }
+
         button.submit-btn:hover { 
             box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
             transform: translateY(-2px);
         }
+
         button.submit-btn:active {
             transform: translateY(1px);
         }
+
         button.submit-btn:disabled { 
             background: #cbd5e1; 
             box-shadow: none;
@@ -336,7 +352,6 @@
     </button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
     const VISION_API_KEY = "AIzaSyAUWjUZ43ADkKVCKpefv-d8Fcf20RCCtxw";
@@ -355,16 +370,12 @@
                 globalData.forEach((item, index) => {
                     const option = document.createElement("option");
                     option.value = index;
-                    
                     const values = Object.values(item);
-                    // ปรับแต่ง: เอาแค่ชื่อบริษัท (คอลัมน์แรก) ไม่ต่อท้ายด้วย TaxID แล้ว เพื่อให้สั้นและอ่านง่าย
                     let displayText = values[0]; 
-                    
                     option.text = displayText ? displayText : `รายการที่ ${index + 1}`; 
                     select.appendChild(option);
                 });
 
-                // เปิดใช้งาน Select2 เมื่อดึงข้อมูลเสร็จ
                 $(document).ready(function() {
                     $('#dataSelect').select2({
                         placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
@@ -377,7 +388,8 @@
                         }
                     });
 
-                    // เมื่อมีการเลือกหรือพิมพ์ค้นหา ให้ดึงข้อมูลมาแสดง
+                    $('#dataSelect').addClass('select2-ready');
+
                     $('#dataSelect').on('change', function() {
                         displaySelectedData();
                     });
@@ -398,7 +410,7 @@
     };
 
     function displaySelectedData() {
-        const selectedIndex = $('#dataSelect').val(); // ดึงค่าจาก Select2
+        const selectedIndex = $('#dataSelect').val(); 
         const displayDiv = document.getElementById("infoDisplay");
         const submitBtn = document.getElementById("submitBtn");
         
@@ -542,7 +554,7 @@
                     document.getElementById('cameraInput').value = "";
                     document.getElementById('galleryInput').value = "";
                     document.getElementById('preview').style.display = "none";
-                    $('#dataSelect').val(null).trigger('change'); // รีเซ็ต Select2
+                    $('#dataSelect').val(null).trigger('change');
                     currentBase64 = "";
                     submitBtn.disabled = true;
                 });
