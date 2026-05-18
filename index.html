@@ -62,9 +62,6 @@
         .form-group { margin-bottom: 25px; }
         label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
 
-        /* =========================================
-           CSS Select2 (โครงสร้างที่ถูกต้องที่สุด)
-           ========================================= */
         .select2-container { width: 100% !important; }
         
         .select2-container--default .select2-selection--single {
@@ -73,7 +70,7 @@
             border: 2px solid var(--border-light);
             background-color: #fcfcfc;
             display: flex;
-            align-items: center; /* จัดกึ่งกลางแนวตั้ง */
+            align-items: center;
         }
 
         .select2-container--default.select2-container--open .select2-selection--single {
@@ -85,7 +82,7 @@
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             width: 100%;
             padding-left: 16px;
-            padding-right: 40px; /* เว้นที่ให้ลูกศรด้านขวา */
+            padding-right: 40px;
             color: var(--text-main);
             font-size: 16px;
             line-height: normal;
@@ -130,7 +127,6 @@
             background-color: var(--primary);
             color: white;
         }
-        /* ========================================= */
 
         .data-section { 
             margin-bottom: 30px; border: 1px solid var(--border-light); 
@@ -248,6 +244,15 @@
     let globalData = [];
     let currentBase64Array = [];
 
+    function checkSubmitButton() {
+        const submitBtn = document.getElementById("submitBtn");
+        if (currentBase64Array.length > 0) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    }
+
     function fetchDataFromSheet(isRefresh = false) {
         Swal.fire({
             title: isRefresh ? 'กำลังอัปเดตข้อมูล...' : 'กำลังเชื่อมต่อระบบ...',
@@ -270,7 +275,7 @@
                     }
                     
                     $select.empty();
-                    $select.append('<option value=""></option>'); // สร้าง Placeholder
+                    $select.append('<option value=""></option>');
 
                     globalData.forEach((item, index) => {
                         const companyName = Object.values(item)[0] || `รายการที่ ${index + 1}`;
@@ -288,11 +293,6 @@
 
                     $select.prop('disabled', false); 
                     
-                    // ==========================================
-                    // 🔥 จุดที่ทำให้พังในครั้งก่อน อยู่ตรงนี้ครับ! 🔥
-                    // เราต้องใช้ .off('change.myApp') แบบระบุชื่อ (Namespace)
-                    // เพื่อไม่ให้ไปทำลายการทำงานพื้นฐานของ Select2 
-                    // ==========================================
                     $select.off('change.myApp').on('change.myApp', function() { 
                         displaySelectedData(); 
                     });
@@ -320,11 +320,10 @@
     function displaySelectedData() {
         const selectedValue = $('#dataSelect').val(); 
         const displayDiv = document.getElementById("infoDisplay");
-        const submitBtn = document.getElementById("submitBtn");
         
         if(selectedValue === null || selectedValue === "") {
             displayDiv.innerHTML = '<div class="info-item" style="grid-column: 1 / -1; text-align: center; padding: 20px 0;"><span style="color:#a0aec0; border: none; background: transparent; box-shadow: none;">กรุณาเลือกรายการด้านบนเพื่อแสดงรายละเอียด</span></div>';
-            submitBtn.disabled = true;
+            checkSubmitButton();
             return;
         }
 
@@ -339,14 +338,12 @@
             displayDiv.appendChild(itemDiv);
         }
         
-        if (currentBase64Array.length > 0) { submitBtn.disabled = false; }
+        checkSubmitButton();
     }
 
     function previewFile(inputElement) {
         const files = inputElement.files;
         const previewContainer = document.getElementById('previewContainer');
-        const submitBtn = document.getElementById("submitBtn");
-        const selectedValue = $('#dataSelect').val();
         
         previewContainer.innerHTML = ""; 
         currentBase64Array = [];
@@ -367,15 +364,12 @@
                     previewContainer.appendChild(img);
                     
                     currentBase64Array.push(reader.result.split(',')[1]);
-                    
-                    if (selectedValue !== null && selectedValue !== "") { 
-                        submitBtn.disabled = false; 
-                    }
+                    checkSubmitButton();
                 }
                 reader.readAsDataURL(file);
             });
         } else {
-            submitBtn.disabled = true;
+            checkSubmitButton();
         }
     }
 
@@ -399,25 +393,13 @@
     }
 
     async function processDocument() {
-        const selectedValue = $('#dataSelect').val();
         const submitBtn = document.getElementById("submitBtn");
         
         if (currentBase64Array.length === 0) {
             Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนสแกน', confirmButtonColor: '#4361ee' });
             return;
         }
-        if (selectedValue === null || selectedValue === "") {
-            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกระเบียนข้อมูลที่ต้องการตรวจสอบก่อน', confirmButtonColor: '#4361ee' });
-            return;
-        }
 
-        const selectedIndex = parseInt(selectedValue);
-        const selectedItem = globalData[selectedIndex];
-        
-        const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
-        const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
-        const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
-        
         submitBtn.disabled = true;
         
         Swal.fire({
@@ -455,209 +437,282 @@
             
             const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
 
-            const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
-            let maxAmount = 0;
-            if (moneyMatches) {
-                moneyMatches.forEach(m => {
-                    const val = parseFloat(m.replace(/,/g, ''));
-                    if (val > maxAmount) { maxAmount = val; }
+            let selectedValue = $('#dataSelect').val();
+            let selectedItem = null;
+
+            if (selectedValue === null || selectedValue === "") {
+                let matchingIndexes = [];
+                globalData.forEach((item, index) => {
+                    const dbTaxId = item["TaxID"] ? item["TaxID"].toString().replace(/\D/g,'') : "";
+                    if (dbTaxId && cleanDetectedTextNumbersOnly.includes(dbTaxId)) {
+                        matchingIndexes.push(index);
+                    }
                 });
-            }
 
-            let amountWarningHtml = '';
-            if (maxAmount >= 1070) {
-                amountWarningHtml = `
-                <div style="margin-top: 15px; background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; border: 1px solid #ffeeba; text-align: left; font-size: 14px; line-height: 1.5;">
-                    <strong style="font-size:15px; color:#d35400;">⚠️ ตรวจพบยอดเงินในบิล: ${maxAmount.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</strong><br>
-                    (ยอดรวมตั้งแต่ 1,070 บาทขึ้นไป)<br>
-                    <span style="font-weight:600;">📌 ต้องออกใบหัก ณ ที่จ่าย (กรุณาตรวจสอบกับเจ้าของงานอีกครั้ง)</span>
-                </div>`;
-            }
+                if (matchingIndexes.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ไม่พบข้อมูลบริษัท!',
+                        text: 'ระบบไม่พบเลขประจำตัวผู้เสียภาษีที่ตรงกับฐานข้อมูล กรุณาเลือกบริษัทด้วยตนเอง',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                    submitBtn.disabled = false;
+                    return;
+                } else if (matchingIndexes.length === 1) {
+                    const targetIndex = matchingIndexes[0];
+                    $('#dataSelect').val(targetIndex).trigger('change.myApp');
+                    selectedItem = globalData[targetIndex];
+                } else {
+                    let optionsHtml = '';
+                    matchingIndexes.forEach(idx => {
+                        const comp = globalData[idx];
+                        const name = comp["CompanyName"] || Object.values(comp)[0];
+                        const addr = comp["Address"] || "";
+                        optionsHtml += `<button class="swal2-styled branch-select-btn" data-idx="${idx}" style="background-color:#4361ee; display:block; margin:10px auto; width:85%; text-align:left; padding:12px 15px; font-size:14px; border-radius:8px; color:white; border:none; cursor:pointer;"><strong>${name}</strong><br><small style="color:#e2e8f0;">${addr}</small></button>`;
+                    });
 
-            function findBestSnippet(dbText, ocrText) {
-                if (!dbText) return "";
-                const ocrLines = ocrText.split('\n');
-                let bestSnippet = "";
-                let maxScore = -1;
-                const targetWords = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
-
-                for (let i = 0; i < ocrLines.length; i++) {
-                    let l1 = ocrLines[i];
-                    let l2 = l1 + (ocrLines[i+1] ? " " + ocrLines[i+1] : "");
-                    let l3 = l2 + (ocrLines[i+2] ? " " + ocrLines[i+2] : "");
-                    
-                    [l1, l2, l3].forEach(snippet => {
-                        let snippetNorm = snippet.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
-                        let score = 0;
-                        targetWords.forEach(tw => {
-                            if (snippetNorm.includes(tw)) score++;
-                        });
-                        let finalScore = score - (snippet.length * 0.005);
-                        if (finalScore > maxScore && score > 0) {
-                            maxScore = finalScore;
-                            bestSnippet = snippet;
+                    Swal.fire({
+                        title: 'พบข้อมูลตรงกันหลายสาขา',
+                        html: `<div>กรุณาเลือกสาขาที่ถูกต้องเพื่อทำการตรวจสอบบิล:</div><div style="margin-top:10px;">${optionsHtml}</div>`,
+                        showConfirmButton: false,
+                        showCancelButton: true,
+                        cancelButtonText: 'ยกเลิก',
+                        didOpen: () => {
+                            const buttons = Swal.getHtmlContainer().querySelectorAll('.branch-select-btn');
+                            buttons.forEach(btn => {
+                                btn.addEventListener('click', function() {
+                                    const idx = this.getAttribute('data-idx');
+                                    Swal.close();
+                                    continueProcessingWithIndex(idx, detectedText, cleanDetectedTextNumbersOnly);
+                                });
+                            });
                         }
                     });
+                    return;
                 }
-                return bestSnippet.replace(/\s+/g, ' ').trim();
-            }
-
-            function analyzeMatch(dbText, ocrText) {
-                if (!dbText) return { score: 1.0, bestSnippet: "" };
-                
-                let matchCount = 0;
-                let hasNumberMismatch = false;
-
-                const dbNumNormalized = dbText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
-                const dbNumbers = dbNumNormalized.match(/\d+/g) || [];
-                
-                const ocrNumNormalized = ocrText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
-                const ocrNumbers = ocrNumNormalized.match(/\d+/g) || [];
-                
-                dbNumbers.forEach(num => {
-                    if (ocrNumbers.includes(num)) {
-                        matchCount++;
-                    } else {
-                        hasNumberMismatch = true;
-                    }
-                });
-
-                const dbLettersNorm = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, ' ');
-                const dbWords = dbLettersNorm.split(/\s+/).filter(w => w.length > 1);
-                
-                const ocrLettersNorm = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, '');
-                
-                dbWords.forEach(w => {
-                    if (ocrLettersNorm.includes(w)) {
-                        matchCount++;
-                    }
-                });
-
-                let totalItems = dbNumbers.length + dbWords.length;
-                let finalScore = totalItems === 0 ? 1.0 : matchCount / totalItems;
-
-                if (hasNumberMismatch && finalScore >= 0.8) {
-                    finalScore = 0.79;
-                }
-
-                let snippet = findBestSnippet(dbText, ocrText);
-
-                return { score: finalScore, bestSnippet: snippet };
-            }
-
-            let taxIdPassed = true;
-            if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
-                taxIdPassed = false;
-            }
-
-            let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText);
-            let addressAnalysis = analyzeMatch(addressToMatch, detectedText);
-
-            let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
-
-            let missingDetailsHtml = '';
-            
-            if (companyAnalysis.score < 1.0 && companyNameToMatch) {
-                let sysHi = highlightDiff(companyNameToMatch, companyAnalysis.bestSnippet);
-                let aiHi = highlightDiff(companyAnalysis.bestSnippet, companyNameToMatch);
-
-                missingDetailsHtml += `
-                    <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #ccc;">
-                        <strong style="color: #2c3e50;">🏢 จุดที่พบปัญหา (ชื่อบริษัท):</strong><br>
-                        <div style="background: #fff5f5; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 13px; line-height: 1.6;">
-                            <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในระบบ:</span> ${sysHi}<br>
-                            <span style="color: #7f8c8d; display:inline-block; width: 60px;">AI อ่านได้:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (addressAnalysis.score < 1.0 && addressToMatch) {
-                let sysHi = highlightDiff(addressToMatch, addressAnalysis.bestSnippet);
-                let aiHi = highlightDiff(addressAnalysis.bestSnippet, addressToMatch);
-
-                missingDetailsHtml += `
-                    <div>
-                        <strong style="color: #2c3e50;">📍 จุดที่พบปัญหา (ที่อยู่):</strong><br>
-                        <div style="background: #fff5f5; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 13px; line-height: 1.6;">
-                            <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในระบบ:</span> ${sysHi}<br>
-                            <span style="color: #7f8c8d; display:inline-block; width: 60px;">AI อ่านได้:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
-                        </div>
-                    </div>
-                `;
-            }
-
-            let missingWordsHtml = '';
-            if (missingDetailsHtml !== '') {
-                missingWordsHtml = `
-                <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">
-                    ${missingDetailsHtml}
-                </div>`;
-            }
-
-            if (!taxIdPassed) {
-                let taxErrorHtml = `
-                <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
-                    <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
-                    • หาเลขนี้บนเอกสารไม่พบ: <span style="font-weight:bold;">${taxIdToMatch}</span>
-                </div>`;
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ข้อมูลไม่ตรงกัน!',
-                    html: '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ</div>' + taxErrorHtml + amountWarningHtml,
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
-                }).then(() => { resetForm(); });
-
-            } else if (lowestScore === 1.0) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'ถูกต้องครบถ้วน 100%!',
-                    html: '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ข้อมูลบัญชีตรงกับระบบเป๊ะทุกตัวอักษร</div>' + amountWarningHtml,
-                    confirmButtonColor: '#2ecc71',
-                    confirmButtonText: 'ตกลง'
-                }).then(() => { resetForm(); });
-
-            } else if (lowestScore >= 0.90) {
-                let accuracyPercent = Math.round(lowestScore * 100);
-                Swal.fire({
-                    icon: 'info',
-                    title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
-                    html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>
-                           ${missingWordsHtml}` + amountWarningHtml,
-                    confirmButtonColor: '#3498db',
-                    confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
-                }).then(() => { resetForm(); });
-
-            } else if (lowestScore >= 0.80) {
-                let accuracyPercent = Math.round(lowestScore * 100);
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
-                    html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>
-                           ${missingWordsHtml}
-                           <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! ระวังเลือกข้อมูลผิดสาขา</div>` + amountWarningHtml,
-                    confirmButtonColor: '#f39c12',
-                    confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
-                }).then(() => { resetForm(); });
-
             } else {
-                let accuracyPercent = Math.round(lowestScore * 100);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ข้อมูลไม่ผ่านเกณฑ์!',
-                    html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ <strong>มีตัวเลขสาขา/ที่อยู่ไม่ตรงกัน</strong> ระบบจึงไม่อนุมัติให้ผ่าน</div>
-                           ${missingWordsHtml}` + amountWarningHtml,
-                    confirmButtonColor: '#e74c3c',
-                    confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
-                }).then(() => { resetForm(); });
+                const selectedIndex = parseInt(selectedValue);
+                selectedItem = globalData[selectedIndex];
             }
+
+            runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
 
         } catch (error) {
             console.error(error);
             Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับ AI ได้ กรุณาลองใหม่อีกครั้ง', 'error').then(() => {
                 submitBtn.disabled = false;
             });
+        }
+    }
+
+    function continueProcessingWithIndex(index, detectedText, cleanDetectedTextNumbersOnly) {
+        const targetIndex = parseInt(index);
+        $('#dataSelect').val(targetIndex).trigger('change.myApp');
+        const selectedItem = globalData[targetIndex];
+        runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
+    }
+
+    function runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly) {
+        const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
+        const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
+        const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
+
+        const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
+        let maxAmount = 0;
+        if (moneyMatches) {
+            moneyMatches.forEach(m => {
+                const val = parseFloat(m.replace(/,/g, ''));
+                if (val > maxAmount) { maxAmount = val; }
+            });
+        }
+
+        let amountWarningHtml = '';
+        if (maxAmount >= 1070) {
+            amountWarningHtml = `
+            <div style="margin-top: 15px; background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; border: 1px solid #ffeeba; text-align: left; font-size: 14px; line-height: 1.5;">
+                <strong style="font-size:15px; color:#d35400;">⚠️ ตรวจพบยอดเงินในบิล: ${maxAmount.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</strong><br>
+                (ยอดรวมตั้งแต่ 1,070 บาทขึ้นไป)<br>
+                <span style="font-weight:600;">📌 ต้องออกใบหัก ณ ที่จ่าย (กรุณาตรวจสอบกับเจ้าของงานอีกครั้ง)</span>
+            </div>`;
+        }
+
+        function findBestSnippet(dbText, ocrText) {
+            if (!dbText) return "";
+            const ocrLines = ocrText.split('\n');
+            let bestSnippet = "";
+            let maxScore = -1;
+            const targetWords = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+
+            for (let i = 0; i < ocrLines.length; i++) {
+                let l1 = ocrLines[i];
+                let l2 = l1 + (ocrLines[i+1] ? " " + ocrLines[i+1] : "");
+                let l3 = l2 + (ocrLines[i+2] ? " " + ocrLines[i+2] : "");
+                
+                [l1, l2, l3].forEach(snippet => {
+                    let snippetNorm = snippet.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
+                    let score = 0;
+                    targetWords.forEach(tw => {
+                        if (snippetNorm.includes(tw)) score++;
+                    });
+                    let finalScore = score - (snippet.length * 0.005);
+                    if (finalScore > maxScore && score > 0) {
+                        maxScore = finalScore;
+                        bestSnippet = snippet;
+                    }
+                });
+            }
+            return bestSnippet.replace(/\s+/g, ' ').trim();
+        }
+
+        function analyzeMatch(dbText, ocrText) {
+            if (!dbText) return { score: 1.0, bestSnippet: "" };
+            
+            let matchCount = 0;
+            let hasNumberMismatch = false;
+
+            const dbNumNormalized = dbText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
+            const dbNumbers = dbNumNormalized.match(/\d+/g) || [];
+            
+            const ocrNumNormalized = ocrText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
+            const ocrNumbers = ocrNumNormalized.match(/\d+/g) || [];
+            
+            dbNumbers.forEach(num => {
+                if (ocrNumbers.includes(num)) {
+                    matchCount++;
+                } else {
+                    hasNumberMismatch = true;
+                }
+            });
+
+            const dbLettersNorm = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, ' ');
+            const dbWords = dbLettersNorm.split(/\s+/).filter(w => w.length > 1);
+            
+            const ocrLettersNorm = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, '');
+            
+            dbWords.forEach(w => {
+                if (ocrLettersNorm.includes(w)) {
+                    matchCount++;
+                }
+            });
+
+            let totalItems = dbNumbers.length + dbWords.length;
+            let finalScore = totalItems === 0 ? 1.0 : matchCount / totalItems;
+
+            if (hasNumberMismatch && finalScore >= 0.8) {
+                finalScore = 0.79;
+            }
+
+            let snippet = findBestSnippet(dbText, ocrText);
+
+            return { score: finalScore, bestSnippet: snippet };
+        }
+
+        let taxIdPassed = true;
+        if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
+            taxIdPassed = false;
+        }
+
+        let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText);
+        let addressAnalysis = analyzeMatch(addressToMatch, detectedText);
+
+        let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
+
+        let missingDetailsHtml = '';
+        
+        if (companyAnalysis.score < 1.0 && companyNameToMatch) {
+            let sysHi = highlightDiff(companyNameToMatch, companyAnalysis.bestSnippet);
+            let aiHi = highlightDiff(companyAnalysis.bestSnippet, companyNameToMatch);
+
+            missingDetailsHtml += `
+                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #ccc;">
+                    <strong style="color: #2c3e50;">🏢 จุดที่พบปัญหา (ชื่อบริษัท):</strong><br>
+                    <div style="background: #fff5f5; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 13px; line-height: 1.6;">
+                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในระบบ:</span> ${sysHi}<br>
+                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">AI อ่านได้:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (addressAnalysis.score < 1.0 && addressToMatch) {
+            let sysHi = highlightDiff(addressToMatch, addressAnalysis.bestSnippet);
+            let aiHi = highlightDiff(addressAnalysis.bestSnippet, addressToMatch);
+
+            missingDetailsHtml += `
+                <div>
+                    <strong style="color: #2c3e50;">📍 จุดที่พบปัญหา (ที่อยู่):</strong><br>
+                    <div style="background: #fff5f5; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 13px; line-height: 1.6;">
+                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในระบบ:</span> ${sysHi}<br>
+                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">AI อ่านได้:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        let missingWordsHtml = '';
+        if (missingDetailsHtml !== '') {
+            missingWordsHtml = `
+            <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">
+                ${missingDetailsHtml}
+            </div>`;
+        }
+
+        if (!taxIdPassed) {
+            let taxErrorHtml = `
+            <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
+                <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
+                • หาเลขนี้บนเอกสารไม่พบ: <span style="font-weight:bold;">${taxIdToMatch}</span>
+            </div>`;
+            Swal.fire({
+                icon: 'error',
+                title: 'ข้อมูลไม่ตรงกัน!',
+                html: '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ</div>' + taxErrorHtml + amountWarningHtml,
+                confirmButtonColor: '#e74c3c',
+                confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
+            }).then(() => { resetForm(); });
+
+        } else if (lowestScore === 1.0) {
+            Swal.fire({
+                icon: 'success',
+                title: 'ถูกต้องครบถ้วน 100%!',
+                html: '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ข้อมูลบัญชีตรงกับระบบเป๊ะทุกตัวอักษร</div>' + amountWarningHtml,
+                confirmButtonColor: '#2ecc71',
+                confirmButtonText: 'ตกลง'
+            }).then(() => { resetForm(); });
+
+        } else if (lowestScore >= 0.90) {
+            let accuracyPercent = Math.round(lowestScore * 100);
+            Swal.fire({
+                icon: 'info',
+                title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
+                html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>
+                       ${missingWordsHtml}` + amountWarningHtml,
+                confirmButtonColor: '#3498db',
+                confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
+            }).then(() => { resetForm(); });
+
+        } else if (lowestScore >= 0.80) {
+            let accuracyPercent = Math.round(lowestScore * 100);
+            Swal.fire({
+                icon: 'warning',
+                title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
+                html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>
+                       ${missingWordsHtml}
+                       <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! ระวังเลือกข้อมูลผิดสาขา</div>` + amountWarningHtml,
+                confirmButtonColor: '#f39c12',
+                confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
+            }).then(() => { resetForm(); });
+
+        } else {
+            let accuracyPercent = Math.round(lowestScore * 100);
+            Swal.fire({
+                icon: 'error',
+                title: 'ข้อมูลไม่ผ่านเกณฑ์!',
+                html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ <strong>มีตัวเลขสาขา/ที่อยู่ไม่ตรงกัน</strong> ระบบจึงไม่อนุมัติให้ผ่าน</div>
+                       ${missingWordsHtml}` + amountWarningHtml,
+                confirmButtonColor: '#e74c3c',
+                confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
+            }).then(() => { resetForm(); });
         }
     }
 
