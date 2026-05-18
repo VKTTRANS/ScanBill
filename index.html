@@ -59,11 +59,7 @@
             line-height: 1.6;
         }
 
-        .form-group { margin-bottom: 25px; }
-        label { font-weight: 500; color: var(--text-main); display: block; margin-bottom: 10px; font-size: 15px; }
-
         .select2-container { width: 100% !important; }
-        
         .select2-container--default .select2-selection--single {
             height: 56px;
             border-radius: 14px;
@@ -72,13 +68,11 @@
             display: flex;
             align-items: center;
         }
-
         .select2-container--default.select2-container--open .select2-selection--single {
             border-color: var(--primary);
             background-color: #fff;
             box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
         }
-
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             width: 100%;
             padding-left: 16px;
@@ -87,16 +81,8 @@
             font-size: 16px;
             line-height: normal;
         }
-
-        .select2-container--default .select2-selection--single .select2-selection__placeholder {
-            color: #999;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 56px;
-            right: 12px;
-        }
-
+        .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #999; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 56px; right: 12px; }
         .select2-container--default .select2-selection--single .select2-selection__clear {
             height: 56px;
             line-height: 56px;
@@ -105,7 +91,6 @@
             font-size: 20px;
             font-weight: bold;
         }
-
         .select2-dropdown {
             font-family: 'Kanit', sans-serif;
             border: 2px solid var(--primary);
@@ -114,35 +99,16 @@
             overflow: hidden;
             z-index: 9999;
         }
-
         .select2-search__field {
             font-family: 'Kanit', sans-serif;
             font-size: 16px !important;
             border-radius: 8px !important;
             padding: 10px !important;
         }
-
         .select2-results__option { padding: 12px 16px; font-size: 15px; }
         .select2-container--default .select2-results__option--highlighted[aria-selected] {
             background-color: var(--primary);
             color: white;
-        }
-
-        .data-section { 
-            margin-bottom: 30px; border: 1px solid var(--border-light); 
-            padding: 20px; border-radius: 16px; background-color: #fafbfc; 
-            animation: fadeIn 0.4s ease-out;
-        }
-        .data-section h3 { margin: 0 0 15px 0; color: var(--text-main); font-size: 17px; display: flex; align-items: center; gap: 8px; }
-
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } .container { padding: 25px 20px; border-radius: 20px;} }
-
-        .info-item label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
-        .info-item span { 
-            display: block; padding: 12px 15px; background: #fff; 
-            border: 1px solid var(--border-light); border-radius: 10px; 
-            font-size: 15px; word-break: break-word; color: var(--text-main); box-shadow: var(--shadow-sm);
         }
 
         .upload-container {
@@ -190,29 +156,11 @@
 
     <div class="warning-note">
         <strong>⚠️ ระบบตรวจสอบอัจฉริยะ:</strong> ระวังตัวอักษรที่คล้ายกัน เช่น <strong>0 (ศูนย์)/O (โอ)</strong> และ <strong>1/I/l</strong><br>
-        <span style="color:#d35400; font-weight:600;">📌 กฎเหล็ก:</span> หาก "ตัวเลข" (เช่น บ้านเลขที่, รหัสไปรษณีย์) บนบิลไม่ตรงกับในระบบแม้แต่ตัวเดียว ระบบจะปรับให้คะแนนตกทันที!
-    </div>
-    
-    <div class="form-group">
-        <label for="dataSelect">1. พิมพ์ค้นหา หรือ เลือกระเบียนข้อมูล</label>
-        <select id="dataSelect" disabled>
-        </select>
-    </div>
-
-    <div class="data-section">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            ข้อมูลอ้างอิง
-        </h3>
-        <div id="infoDisplay" class="info-grid">
-            <div class="info-item" style="grid-column: 1 / -1; text-align: center; padding: 20px 0;">
-                <span style="color:#a0aec0; border: none; background: transparent; box-shadow: none;">กรุณาเลือกรายการด้านบนเพื่อแสดงรายละเอียด</span>
-            </div>
-        </div>
+        <span style="color:#d35400; font-weight:600;">📌 กฎเหล็ก:</span> ระบบจะค้นหาเลขผู้เสียภาษี 13 หลักบนบิลให้อัตโนมัติ หากไม่พบข้อมูลสามารถค้นหาชื่อบริษัทเองได้
     </div>
 
     <div class="upload-container">
-        <p class="upload-header">2. นำเข้าเอกสารเพื่อตรวจสอบ (อัปโหลดหลายใบพร้อมกันได้)</p>
+        <p class="upload-header">นำเข้าเอกสารเพื่อตรวจสอบ (อัปโหลดหลายใบพร้อมกันได้)</p>
         
         <div class="action-buttons">
             <div class="action-btn" onclick="document.getElementById('cameraInput').click()">
@@ -242,20 +190,16 @@
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
     const VISION_API_KEY = "AIzaSyAUWjUZ43ADkKVCKpefv-d8Fcf20RCCtxw";
     let globalData = [];
+    let globalSelect2Data = [];
     let currentBase64Array = [];
 
     function checkSubmitButton() {
-        const submitBtn = document.getElementById("submitBtn");
-        if (currentBase64Array.length > 0) {
-            submitBtn.disabled = false;
-        } else {
-            submitBtn.disabled = true;
-        }
+        document.getElementById("submitBtn").disabled = currentBase64Array.length === 0;
     }
 
-    function fetchDataFromSheet(isRefresh = false) {
+    function fetchDataFromSheet() {
         Swal.fire({
-            title: isRefresh ? 'กำลังอัปเดตข้อมูล...' : 'กำลังเชื่อมต่อระบบ...',
+            title: 'กำลังเชื่อมต่อระบบ...',
             text: 'กำลังดึงฐานข้อมูลบริษัทล่าสุด กรุณารอสักครู่',
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading() }
@@ -266,46 +210,15 @@
         .then(res => {
             if(res.status === "success") {
                 globalData = res.data;
-
-                $(document).ready(function() {
-                    const $select = $('#dataSelect');
-                    
-                    if ($select.hasClass("select2-hidden-accessible")) {
-                        $select.select2('destroy');
-                    }
-                    
-                    $select.empty();
-                    $select.append('<option value=""></option>');
-
-                    globalData.forEach((item, index) => {
-                        const companyName = Object.values(item)[0] || `รายการที่ ${index + 1}`;
-                        $select.append(`<option value="${index}">${companyName}</option>`);
+                globalSelect2Data = [{ id: '', text: '' }]; 
+                
+                globalData.forEach((item, index) => {
+                    globalSelect2Data.push({
+                        id: index.toString(),
+                        text: Object.values(item)[0] || `รายการที่ ${index + 1}`
                     });
-
-                    $select.select2({
-                        placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
-                        allowClear: true,
-                        width: '100%',
-                        language: {
-                            noResults: function() { return "ไม่พบข้อมูลที่ค้นหา"; }
-                        }
-                    });
-
-                    $select.prop('disabled', false); 
-                    
-                    $select.off('change.myApp').on('change.myApp', function() { 
-                        displaySelectedData(); 
-                    });
-                    
-                    $select.val('').trigger('change');
-
-                    if (isRefresh) {
-                        Swal.fire({icon: 'success', title: 'อัปเดตข้อมูลสำเร็จ!', timer: 1000, showConfirmButton: false});
-                    } else {
-                        Swal.close();
-                    }
                 });
-
+                Swal.close();
             } else {
                 Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถดึงข้อมูลจาก Sheet ได้', 'error');
             }
@@ -315,36 +228,11 @@
         });
     }
 
-    window.onload = function() { fetchDataFromSheet(false); };
-
-    function displaySelectedData() {
-        const selectedValue = $('#dataSelect').val(); 
-        const displayDiv = document.getElementById("infoDisplay");
-        
-        if(selectedValue === null || selectedValue === "") {
-            displayDiv.innerHTML = '<div class="info-item" style="grid-column: 1 / -1; text-align: center; padding: 20px 0;"><span style="color:#a0aec0; border: none; background: transparent; box-shadow: none;">กรุณาเลือกรายการด้านบนเพื่อแสดงรายละเอียด</span></div>';
-            checkSubmitButton();
-            return;
-        }
-
-        const selectedIndex = parseInt(selectedValue);
-        const selectedItem = globalData[selectedIndex];
-        displayDiv.innerHTML = "";
-        
-        for (const [key, value] of Object.entries(selectedItem)) {
-            const itemDiv = document.createElement("div");
-            itemDiv.className = "info-item";
-            itemDiv.innerHTML = `<label>${key}</label><span>${value || '-'}</span>`;
-            displayDiv.appendChild(itemDiv);
-        }
-        
-        checkSubmitButton();
-    }
+    window.onload = function() { fetchDataFromSheet(); };
 
     function previewFile(inputElement) {
         const files = inputElement.files;
         const previewContainer = document.getElementById('previewContainer');
-        
         previewContainer.innerHTML = ""; 
         currentBase64Array = [];
 
@@ -362,7 +250,6 @@
                     img.src = reader.result;
                     img.className = 'preview-img';
                     previewContainer.appendChild(img);
-                    
                     currentBase64Array.push(reader.result.split(',')[1]);
                     checkSubmitButton();
                 }
@@ -376,10 +263,8 @@
     function highlightDiff(sourceText, compareText) {
         if (!sourceText) return "";
         if (!compareText) return `<span style="color: #e74c3c; font-weight: bold;">${sourceText}</span>`;
-        
         let sourceWords = sourceText.split(/\s+/);
         let cleanTextB = compareText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-        
         let result = [];
         sourceWords.forEach(w => {
             let cleanW = w.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
@@ -394,17 +279,11 @@
 
     async function processDocument() {
         const submitBtn = document.getElementById("submitBtn");
-        
-        if (currentBase64Array.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาถ่ายรูปหรืออัปโหลดเอกสารก่อนสแกน', confirmButtonColor: '#4361ee' });
-            return;
-        }
-
         submitBtn.disabled = true;
         
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: `กรุณารอสักครู่ ระบบกำลังตรวจสอบเอกสาร ${currentBase64Array.length} ใบ`,
+            html: `ค้นหาเลขผู้เสียภาษีบนเอกสาร ${currentBase64Array.length} ใบ`,
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading() }
         });
@@ -414,13 +293,11 @@
             features: [{ type: "TEXT_DETECTION" }]
         }));
 
-        const visionPayload = { requests: requests };
-
         try {
             const visionResponse = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(visionPayload)
+                body: JSON.stringify({ requests: requests })
             });
 
             const visionData = await visionResponse.json();
@@ -437,65 +314,61 @@
             
             const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
 
-            let selectedValue = $('#dataSelect').val();
-            let selectedItem = null;
+            let matchingIndexes = [];
+            globalData.forEach((item, index) => {
+                const dbTaxId = item["TaxID"] ? item["TaxID"].toString().replace(/\D/g,'') : "";
+                if (dbTaxId && dbTaxId.length >= 10 && cleanDetectedTextNumbersOnly.includes(dbTaxId)) {
+                    matchingIndexes.push(index);
+                }
+            });
 
-            if (selectedValue === null || selectedValue === "") {
-                let matchingIndexes = [];
-                globalData.forEach((item, index) => {
-                    const dbTaxId = item["TaxID"] ? item["TaxID"].toString().replace(/\D/g,'') : "";
-                    if (dbTaxId && cleanDetectedTextNumbersOnly.includes(dbTaxId)) {
-                        matchingIndexes.push(index);
+            if (matchingIndexes.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'สแกนไม่พบเลข 13 หลัก',
+                    html: 'รูปภาพอาจไม่ชัดเจน หรือไม่มีข้อมูลบริษัทนี้ในระบบ<br>คุณต้องการทำอย่างไร?',
+                    showCancelButton: true,
+                    confirmButtonText: '🔍 เลือกบริษัทด้วยตนเอง',
+                    cancelButtonText: '❌ ปิดเพื่ออัปโหลดใหม่',
+                    confirmButtonColor: '#4361ee',
+                    cancelButtonColor: '#e74c3c'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showManualSelectionPopup(detectedText, cleanDetectedTextNumbersOnly);
+                    } else {
+                        submitBtn.disabled = false;
                     }
                 });
-
-                if (matchingIndexes.length === 0) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'ไม่พบข้อมูลบริษัท!',
-                        text: 'ระบบไม่พบเลขประจำตัวผู้เสียภาษีที่ตรงกับฐานข้อมูล กรุณาเลือกบริษัทด้วยตนเอง',
-                        confirmButtonColor: '#e74c3c'
-                    });
-                    submitBtn.disabled = false;
-                    return;
-                } else if (matchingIndexes.length === 1) {
-                    const targetIndex = matchingIndexes[0];
-                    $('#dataSelect').val(targetIndex).trigger('change.myApp');
-                    selectedItem = globalData[targetIndex];
-                } else {
-                    let optionsHtml = '';
-                    matchingIndexes.forEach(idx => {
-                        const comp = globalData[idx];
-                        const name = comp["CompanyName"] || Object.values(comp)[0];
-                        const addr = comp["Address"] || "";
-                        optionsHtml += `<button class="swal2-styled branch-select-btn" data-idx="${idx}" style="background-color:#4361ee; display:block; margin:10px auto; width:85%; text-align:left; padding:12px 15px; font-size:14px; border-radius:8px; color:white; border:none; cursor:pointer;"><strong>${name}</strong><br><small style="color:#e2e8f0;">${addr}</small></button>`;
-                    });
-
-                    Swal.fire({
-                        title: 'พบข้อมูลตรงกันหลายสาขา',
-                        html: `<div>กรุณาเลือกสาขาที่ถูกต้องเพื่อทำการตรวจสอบบิล:</div><div style="margin-top:10px;">${optionsHtml}</div>`,
-                        showConfirmButton: false,
-                        showCancelButton: true,
-                        cancelButtonText: 'ยกเลิก',
-                        didOpen: () => {
-                            const buttons = Swal.getHtmlContainer().querySelectorAll('.branch-select-btn');
-                            buttons.forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const idx = this.getAttribute('data-idx');
-                                    Swal.close();
-                                    continueProcessingWithIndex(idx, detectedText, cleanDetectedTextNumbersOnly);
-                                });
-                            });
-                        }
-                    });
-                    return;
-                }
+            } else if (matchingIndexes.length === 1) {
+                const selectedItem = globalData[matchingIndexes[0]];
+                runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
             } else {
-                const selectedIndex = parseInt(selectedValue);
-                selectedItem = globalData[selectedIndex];
-            }
+                let optionsHtml = '';
+                matchingIndexes.forEach(idx => {
+                    const comp = globalData[idx];
+                    const name = comp["CompanyName"] || Object.values(comp)[0];
+                    const addr = comp["Address"] || "";
+                    optionsHtml += `<button class="swal2-styled branch-select-btn" data-idx="${idx}" style="background-color:#4361ee; display:block; margin:10px auto; width:85%; text-align:left; padding:12px 15px; font-size:14px; border-radius:8px; color:white; border:none; cursor:pointer;"><strong>${name}</strong><br><small style="color:#e2e8f0;">${addr}</small></button>`;
+                });
 
-            runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
+                Swal.fire({
+                    title: 'พบข้อมูลตรงกันหลายสาขา',
+                    html: `<div>กรุณาเลือกสาขาที่ถูกต้องเพื่อทำการตรวจสอบบิล:</div><div style="margin-top:10px;">${optionsHtml}</div>`,
+                    showConfirmButton: false,
+                    showCancelButton: true,
+                    cancelButtonText: 'ยกเลิก',
+                    didOpen: () => {
+                        const buttons = Swal.getHtmlContainer().querySelectorAll('.branch-select-btn');
+                        buttons.forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const idx = this.getAttribute('data-idx');
+                                Swal.close();
+                                runEvaluation(globalData[parseInt(idx)], detectedText, cleanDetectedTextNumbersOnly);
+                            });
+                        });
+                    }
+                });
+            }
 
         } catch (error) {
             console.error(error);
@@ -505,11 +378,38 @@
         }
     }
 
-    function continueProcessingWithIndex(index, detectedText, cleanDetectedTextNumbersOnly) {
-        const targetIndex = parseInt(index);
-        $('#dataSelect').val(targetIndex).trigger('change.myApp');
-        const selectedItem = globalData[targetIndex];
-        runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
+    function showManualSelectionPopup(detectedText, cleanDetectedTextNumbersOnly) {
+        Swal.fire({
+            title: 'เลือกบริษัทด้วยตนเอง',
+            html: '<div style="text-align:left; margin-bottom:15px; font-size:14px; color:#e74c3c;">⚠️ กรุณาพิมพ์ค้นหาชื่อบริษัทที่ต้องการตรวจสอบ</div><select id="manualSelect2" style="width:100%"></select>',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยันและตรวจสอบ',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#4361ee',
+            didOpen: () => {
+                $('#manualSelect2').select2({
+                    data: globalSelect2Data,
+                    placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
+                    dropdownParent: $('.swal2-popup'),
+                    allowClear: true
+                });
+            },
+            preConfirm: () => {
+                const val = $('#manualSelect2').val();
+                if (!val) {
+                    Swal.showValidationMessage('กรุณาเลือกบริษัทก่อนกดยืนยัน');
+                    return false;
+                }
+                return val;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const selectedItem = globalData[parseInt(result.value)];
+                runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
+            } else {
+                document.getElementById("submitBtn").disabled = false;
+            }
+        });
     }
 
     function runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly) {
@@ -602,9 +502,7 @@
                 finalScore = 0.79;
             }
 
-            let snippet = findBestSnippet(dbText, ocrText);
-
-            return { score: finalScore, bestSnippet: snippet };
+            return { score: finalScore, bestSnippet: findBestSnippet(dbText, ocrText) };
         }
 
         let taxIdPassed = true;
@@ -614,7 +512,6 @@
 
         let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText);
         let addressAnalysis = analyzeMatch(addressToMatch, detectedText);
-
         let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
 
         let missingDetailsHtml = '';
@@ -622,7 +519,6 @@
         if (companyAnalysis.score < 1.0 && companyNameToMatch) {
             let sysHi = highlightDiff(companyNameToMatch, companyAnalysis.bestSnippet);
             let aiHi = highlightDiff(companyAnalysis.bestSnippet, companyNameToMatch);
-
             missingDetailsHtml += `
                 <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #ccc;">
                     <strong style="color: #2c3e50;">🏢 จุดที่พบปัญหา (ชื่อบริษัท):</strong><br>
@@ -630,14 +526,12 @@
                         <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในระบบ:</span> ${sysHi}<br>
                         <span style="color: #7f8c8d; display:inline-block; width: 60px;">AI อ่านได้:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
                     </div>
-                </div>
-            `;
+                </div>`;
         }
         
         if (addressAnalysis.score < 1.0 && addressToMatch) {
             let sysHi = highlightDiff(addressToMatch, addressAnalysis.bestSnippet);
             let aiHi = highlightDiff(addressAnalysis.bestSnippet, addressToMatch);
-
             missingDetailsHtml += `
                 <div>
                     <strong style="color: #2c3e50;">📍 จุดที่พบปัญหา (ที่อยู่):</strong><br>
@@ -645,28 +539,28 @@
                         <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในระบบ:</span> ${sysHi}<br>
                         <span style="color: #7f8c8d; display:inline-block; width: 60px;">AI อ่านได้:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
         let missingWordsHtml = '';
         if (missingDetailsHtml !== '') {
-            missingWordsHtml = `
-            <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">
-                ${missingDetailsHtml}
-            </div>`;
+            missingWordsHtml = `<div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">${missingDetailsHtml}</div>`;
         }
 
+        let companyHeaderHtml = `<div style="background-color:#eef2ff; padding:10px; border-radius:8px; margin-bottom:15px; text-align:left; border:1px solid #c7d2fe;">
+            <strong style="color:#4361ee; font-size:15px;">ตรวจสอบกับบริษัท:</strong><br>
+            <span style="font-size:14px; color:#1e293b;">${companyNameToMatch}</span>
+        </div>`;
+
         if (!taxIdPassed) {
-            let taxErrorHtml = `
-            <div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
+            let taxErrorHtml = `<div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
                 <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
                 • หาเลขนี้บนเอกสารไม่พบ: <span style="font-weight:bold;">${taxIdToMatch}</span>
             </div>`;
             Swal.fire({
                 icon: 'error',
                 title: 'ข้อมูลไม่ตรงกัน!',
-                html: '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ</div>' + taxErrorHtml + amountWarningHtml,
+                html: companyHeaderHtml + '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ</div>' + taxErrorHtml + amountWarningHtml,
                 confirmButtonColor: '#e74c3c',
                 confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
             }).then(() => { resetForm(); });
@@ -675,7 +569,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'ถูกต้องครบถ้วน 100%!',
-                html: '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ข้อมูลบัญชีตรงกับระบบเป๊ะทุกตัวอักษร</div>' + amountWarningHtml,
+                html: companyHeaderHtml + '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ข้อมูลบัญชีตรงกับระบบเป๊ะทุกตัวอักษร</div>' + amountWarningHtml,
                 confirmButtonColor: '#2ecc71',
                 confirmButtonText: 'ตกลง'
             }).then(() => { resetForm(); });
@@ -685,8 +579,7 @@
             Swal.fire({
                 icon: 'info',
                 title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
-                html: `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>
-                       ${missingWordsHtml}` + amountWarningHtml,
+                html: companyHeaderHtml + `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>${missingWordsHtml}` + amountWarningHtml,
                 confirmButtonColor: '#3498db',
                 confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
             }).then(() => { resetForm(); });
@@ -696,8 +589,7 @@
             Swal.fire({
                 icon: 'warning',
                 title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
-                html: `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>
-                       ${missingWordsHtml}
+                html: companyHeaderHtml + `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>${missingWordsHtml}
                        <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! ระวังเลือกข้อมูลผิดสาขา</div>` + amountWarningHtml,
                 confirmButtonColor: '#f39c12',
                 confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
@@ -708,8 +600,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'ข้อมูลไม่ผ่านเกณฑ์!',
-                html: `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ <strong>มีตัวเลขสาขา/ที่อยู่ไม่ตรงกัน</strong> ระบบจึงไม่อนุมัติให้ผ่าน</div>
-                       ${missingWordsHtml}` + amountWarningHtml,
+                html: companyHeaderHtml + `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ <strong>มีตัวเลขสาขา/ที่อยู่ไม่ตรงกัน</strong> ระบบจึงไม่อนุมัติให้ผ่าน</div>${missingWordsHtml}` + amountWarningHtml,
                 confirmButtonColor: '#e74c3c',
                 confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
             }).then(() => { resetForm(); });
@@ -722,8 +613,6 @@
         document.getElementById('previewContainer').innerHTML = "";
         currentBase64Array = [];
         document.getElementById("submitBtn").disabled = true;
-        
-        fetchDataFromSheet(true);
     }
 </script>
 
