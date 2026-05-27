@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VKT ระบบตรวจสอบและสแกนเอกสาร</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
     
     <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
             font-family: 'Kanit', sans-serif; 
             background-color: var(--bg-color); 
             margin: 0; 
-            padding: 20px 15px; 
+            padding: 15px; /* ลด padding ลงสำหรับมือถือ */
             color: var(--text-main); 
         }
 
@@ -38,32 +38,33 @@
             max-width: 700px; 
             margin: 0 auto; 
             background: var(--card-bg); 
-            padding: 30px 25px; 
-            border-radius: 24px; 
+            padding: 25px 20px; 
+            border-radius: 20px; 
             box-shadow: var(--shadow-md); 
         }
 
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h2 { color: var(--primary); margin: 0 0 8px 0; font-size: 26px; font-weight: 600; }
-        .header p { color: var(--text-muted); margin: 0; font-size: 15px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h2 { color: var(--primary); margin: 0 0 5px 0; font-size: 24px; font-weight: 600; }
+        .header p { color: var(--text-muted); margin: 0; font-size: 14px; }
 
         .warning-note {
             background-color: #f8f9fc;
             color: #2c3e50;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 13px; /* ลดขนาดข้อความรอง */
             text-align: left;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border: 1px solid #dcdde1;
-            border-left: 6px solid #e74c3c;
-            line-height: 1.6;
+            border-left: 5px solid #e74c3c;
+            line-height: 1.5;
         }
+        .warning-note .title { font-size: 15px; font-weight: 600; color: #e74c3c; }
 
         .select2-container { width: 100% !important; }
         .select2-container--default .select2-selection--single {
-            height: 56px;
-            border-radius: 14px;
+            height: 50px;
+            border-radius: 12px;
             border: 2px solid var(--border-light);
             background-color: #fcfcfc;
             display: flex;
@@ -76,21 +77,16 @@
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             width: 100%;
-            padding-left: 16px;
+            padding-left: 14px;
             padding-right: 40px;
             color: var(--text-main);
-            font-size: 16px;
+            font-size: 15px;
             line-height: normal;
         }
         .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #999; }
-        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 56px; right: 12px; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 50px; right: 10px; }
         .select2-container--default .select2-selection--single .select2-selection__clear {
-            height: 56px;
-            line-height: 56px;
-            margin-right: 15px;
-            color: #e74c3c;
-            font-size: 20px;
-            font-weight: bold;
+            height: 50px; line-height: 50px; margin-right: 12px; color: #e74c3c; font-size: 18px; font-weight: bold;
         }
         .select2-dropdown {
             font-family: 'Kanit', sans-serif;
@@ -101,44 +97,40 @@
             z-index: 9999;
         }
         .select2-search__field {
-            font-family: 'Kanit', sans-serif;
-            font-size: 16px !important;
-            border-radius: 8px !important;
-            padding: 10px !important;
+            font-family: 'Kanit', sans-serif; font-size: 15px !important; border-radius: 8px !important; padding: 8px !important;
         }
-        .select2-results__option { padding: 12px 16px; font-size: 15px; }
+        .select2-results__option { padding: 10px 14px; font-size: 14px; }
         .select2-container--default .select2-results__option--highlighted[aria-selected] {
-            background-color: var(--primary);
-            color: white;
+            background-color: var(--primary); color: white;
         }
 
         .upload-container {
-            border: 2px dashed #bcccff; padding: 25px 20px; border-radius: 16px; 
-            background-color: #f4f7ff; margin-bottom: 25px; text-align: center;
+            border: 2px dashed #bcccff; padding: 20px 15px; border-radius: 16px; 
+            background-color: #f4f7ff; margin-bottom: 20px; text-align: center;
         }
-        .upload-header { margin: 0 0 15px 0; color: var(--primary); font-weight: 500; font-size: 16px; }
+        .upload-header { margin: 0 0 12px 0; color: var(--primary); font-weight: 500; font-size: 15px; }
 
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .action-btn {
             background-color: white; border: 1px solid var(--primary); color: var(--primary);
-            padding: 15px; border-radius: 12px; cursor: pointer; display: flex;
+            padding: 12px; border-radius: 12px; cursor: pointer; display: flex;
             flex-direction: column; align-items: center; justify-content: center;
-            gap: 8px; font-size: 14px; font-weight: 500; transition: all 0.2s ease; box-shadow: var(--shadow-sm);
+            gap: 6px; font-size: 13px; font-weight: 500; transition: all 0.2s ease; box-shadow: var(--shadow-sm);
         }
         .action-btn:hover { background-color: var(--primary); color: white; }
         .action-btn:active { transform: scale(0.96); }
-        .action-btn svg { width: 28px; height: 28px; }
+        .action-btn svg { width: 24px; height: 24px; }
 
         input[type="file"] { display: none; }
 
-        #previewContainer { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
-        .preview-img { max-width: 100%; max-height: 150px; border-radius: 8px; box-shadow: var(--shadow-sm); object-fit: contain; animation: fadeIn 0.4s ease-out; }
+        #previewContainer { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; }
+        .preview-img { max-width: 100%; max-height: 120px; border-radius: 8px; box-shadow: var(--shadow-sm); object-fit: contain; animation: fadeIn 0.4s ease-out; }
 
         button.submit-btn { 
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-            color: white; border: none; padding: 16px; font-size: 18px; font-family: 'Kanit', sans-serif;
+            color: white; border: none; padding: 14px; font-size: 16px; font-family: 'Kanit', sans-serif;
             border-radius: 14px; cursor: pointer; width: 100%; font-weight: 500; transition: all 0.3s; 
-            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         button.submit-btn:hover { box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4); transform: translateY(-2px); }
         button.submit-btn:active { transform: translateY(1px); }
@@ -146,13 +138,30 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ปรับแต่งขนาด popup ของ SweetAlert ให้ไอคอนเล็กลง */
+        /* ปรับแต่ง SweetAlert สำหรับหน้าจอมือถือ */
+        .swal2-popup {
+            padding: 1.2em 1em !important; /* ลดขอบใน popup */
+            width: 95% !important; /* ให้กว้างเต็มจอมือถือ */
+            max-width: 500px !important;
+        }
         .swal2-icon {
-            transform: scale(0.65); /* ลดขนาดไอคอน */
-            margin: 0 auto -10px auto !important; /* ดึงข้อความให้ชิดไอคอนมากขึ้น */
+            transform: scale(0.6); /* ไอคอนเล็กลงอีกนิด */
+            margin: 0 auto -15px auto !important; /* ดึงข้อความเข้าหาไอคอน */
         }
         .swal2-title {
-            font-size: 24px !important;
+            font-size: 20px !important; /* ขนาดหัวข้อกำลังดี */
+            padding-top: 0 !important;
+        }
+        .swal2-html-container {
+            margin: 10px 0 0 0 !important;
+        }
+
+        /* สำหรับหน้าจอที่เล็กมากๆ (มือถือทั่วไป) */
+        @media (max-width: 480px) {
+            .container { padding: 20px 15px; }
+            .header h2 { font-size: 22px; }
+            .action-buttons { gap: 8px; }
+            .action-btn { padding: 10px; font-size: 12px; }
         }
     </style>
 </head>
@@ -165,20 +174,19 @@
     </div>
 
     <div class="warning-note">
-        <strong style="color: #e74c3c; font-size: 16px;">⚠️ ข้อควรระวังในการตรวจสอบเอกสาร</strong>
-        <div style="background: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px solid #ffeeba;">
-            <strong style="color: #d35400;">🔍 โปรดระวังตัวอักษรที่คล้ายกัน (อาจทำให้ AI อ่านผิดเพี้ยน):</strong>
-            <ul style="margin: 5px 0 0 0; padding-left: 20px; font-weight: 600; color: #c0392b;">
+        <div class="title">⚠️ ข้อควรระวังในการตรวจสอบ</div>
+        <div style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; margin: 8px 0; border: 1px solid #ffeeba;">
+            <strong style="color: #d35400;">🔍 โปรดระวังตัวอักษรที่คล้ายกัน:</strong>
+            <ul style="margin: 3px 0 0 0; padding-left: 20px; font-weight: 500; color: #c0392b;">
                 <li>เลข 0 (ศูนย์) กับ ตัวอักษร O (โอ)</li>
-                <li>เลข 8 (แปด) กับ ตัวอักษร B (บีใหญ่)</li>
                 <li>เลข 1 (หนึ่ง) กับ ตัวอักษร I (ไอใหญ่) หรือ l (แอลเล็ก)</li>
             </ul>
         </div>
-        <span style="color:#2980b9; font-weight:600;">📌 กฎเหล็ก:</span> ระบบจะค้นหาเลขผู้เสียภาษี 13 หลักบนบิลให้อัตโนมัติ หากไม่พบข้อมูลสามารถค้นหาชื่อบริษัทเองได้
+        <span style="color:#2980b9; font-weight:600;">📌 กฎเหล็ก:</span> ระบบจะหาเลขผู้เสียภาษี 13 หลักอัตโนมัติ หากไม่พบ สามารถค้นหาชื่อบริษัทเองได้
     </div>
 
     <div class="upload-container">
-        <p class="upload-header">นำเข้าเอกสารเพื่อตรวจสอบ (อัปโหลดหลายใบพร้อมกันได้)</p>
+        <p class="upload-header">นำเข้าเอกสารเพื่อตรวจสอบ</p>
         
         <div class="action-buttons">
             <div class="action-btn" onclick="document.getElementById('cameraInput').click()">
@@ -301,7 +309,7 @@
         
         Swal.fire({
             title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: `ค้นหาเลขผู้เสียภาษีบนเอกสาร ${currentBase64Array.length} ใบ`,
+            html: `<span style="font-size: 14px;">ค้นหาเลขผู้เสียภาษีบนเอกสาร ${currentBase64Array.length} ใบ</span>`,
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading() }
         });
@@ -344,10 +352,10 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'สแกนไม่พบเลข 13 หลัก',
-                    html: 'รูปภาพอาจไม่ชัดเจน หรือไม่มีข้อมูลบริษัทนี้ในระบบ<br>คุณต้องการทำอย่างไร?',
+                    html: '<span style="font-size:14px;">รูปภาพอาจไม่ชัด หรือไม่มีข้อมูลในระบบ<br>คุณต้องการทำอย่างไร?</span>',
                     showCancelButton: true,
-                    confirmButtonText: '🔍 เลือกบริษัทด้วยตนเอง',
-                    cancelButtonText: '❌ ปิดเพื่ออัปโหลดใหม่',
+                    confirmButtonText: '🔍 เลือกบริษัทเอง',
+                    cancelButtonText: '❌ ปิด',
                     confirmButtonColor: '#4361ee',
                     cancelButtonColor: '#e74c3c'
                 }).then((result) => {
@@ -366,12 +374,12 @@
                     const comp = globalData[idx];
                     const name = comp["CompanyName"] || Object.values(comp)[0];
                     const addr = comp["Address"] || "";
-                    optionsHtml += `<button class="swal2-styled branch-select-btn" data-idx="${idx}" style="background-color:#4361ee; display:block; margin:10px auto; width:85%; text-align:left; padding:12px 15px; font-size:14px; border-radius:8px; color:white; border:none; cursor:pointer;"><strong>${name}</strong><br><small style="color:#e2e8f0;">${addr}</small></button>`;
+                    optionsHtml += `<button class="swal2-styled branch-select-btn" data-idx="${idx}" style="background-color:#4361ee; display:block; margin:8px auto; width:95%; text-align:left; padding:10px 12px; font-size:13px; border-radius:8px; color:white; border:none; cursor:pointer;"><strong>${name}</strong><br><small style="color:#e2e8f0; font-size:11px;">${addr}</small></button>`;
                 });
 
                 Swal.fire({
-                    title: 'พบข้อมูลตรงกันหลายสาขา',
-                    html: `<div>กรุณาเลือกสาขาที่ถูกต้องเพื่อทำการตรวจสอบบิล:</div><div style="margin-top:10px;">${optionsHtml}</div>`,
+                    title: 'พบข้อมูลหลายสาขา',
+                    html: `<div style="font-size:14px;">กรุณาเลือกสาขาที่ถูกต้อง:</div><div style="margin-top:10px;">${optionsHtml}</div>`,
                     showConfirmButton: false,
                     showCancelButton: true,
                     cancelButtonText: 'ยกเลิก',
@@ -399,15 +407,15 @@
     function showManualSelectionPopup(detectedText, cleanDetectedTextNumbersOnly) {
         Swal.fire({
             title: 'เลือกบริษัทด้วยตนเอง',
-            html: '<div style="text-align:left; margin-bottom:15px; font-size:14px; color:#e74c3c;">⚠️ กรุณาพิมพ์ค้นหาชื่อบริษัทที่ต้องการตรวจสอบ</div><select id="manualSelect2" style="width:100%"></select>',
+            html: '<div style="text-align:left; margin-bottom:12px; font-size:13px; color:#e74c3c;">⚠️ พิมพ์ค้นหาชื่อบริษัทที่ต้องการตรวจสอบ</div><select id="manualSelect2" style="width:100%"></select>',
             showCancelButton: true,
-            confirmButtonText: 'ยืนยันและตรวจสอบ',
+            confirmButtonText: 'ยืนยัน',
             cancelButtonText: 'ยกเลิก',
             confirmButtonColor: '#4361ee',
             didOpen: () => {
                 $('#manualSelect2').select2({
                     data: globalSelect2Data,
-                    placeholder: "-- พิมพ์ค้นหา หรือ เลือกบริษัท --",
+                    placeholder: "-- พิมพ์ค้นหาบริษัท --",
                     dropdownParent: $('.swal2-popup'),
                     allowClear: true
                 });
@@ -447,10 +455,12 @@
         let amountWarningHtml = '';
         if (maxAmount >= 1070) {
             amountWarningHtml = `
-            <div style="margin-top: 15px; background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; border: 1px solid #ffeeba; text-align: left; font-size: 14px; line-height: 1.5;">
-                <strong style="font-size:15px; color:#d35400;">⚠️ ตรวจพบยอดเงินในบิล: ${maxAmount.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</strong><br>
-                (ยอดรวมตั้งแต่ 1,070 บาทขึ้นไป)<br>
-                <span style="font-weight:600;">📌 ต้องออกใบหัก ณ ที่จ่าย (กรุณาตรวจสอบกับเจ้าของงานอีกครั้ง)</span>
+            <div style="margin-top: 12px; background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; border: 1px solid #ffeeba; text-align: center; line-height: 1.4;">
+                <strong style="font-size:15px; color:#d35400;">⚠️ ยอดเงินในบิล: ${maxAmount.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</strong>
+                <div style="font-size: 12px; margin-top: 4px; color: #666;">
+                    (ยอดรวมตั้งแต่ 1,070 บาทขึ้นไป)<br>
+                    <span style="font-weight:600; color:#d35400;">📌 ต้องออกใบหัก ณ ที่จ่าย</span>
+                </div>
             </div>`;
         }
 
@@ -534,15 +544,16 @@
 
         let missingDetailsHtml = '';
         
+        // ลดขนาดฟอนต์ของรายละเอียดส่วนนี้ลง เพื่อไม่ให้เกะกะสายตา
         if (companyAnalysis.score < 1.0 && companyNameToMatch) {
             let sysHi = highlightDiff(companyNameToMatch, companyAnalysis.bestSnippet);
             let aiHi = highlightDiff(companyAnalysis.bestSnippet, companyNameToMatch);
             missingDetailsHtml += `
-                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #ccc;">
-                    <strong style="color: #2c3e50;">🏢 จุดที่พบปัญหา (ชื่อบริษัท):</strong><br>
-                    <div style="background: #fff5f5; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 13px; line-height: 1.6;">
-                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">ที่ถูกต้อง:</span> ${sysHi}<br>
-                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในใบเสร็จ:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
+                <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #ccc;">
+                    <strong style="color: #2c3e50; font-size:13px;">🏢 ชื่อบริษัท:</strong><br>
+                    <div style="background: #fff5f5; padding: 6px 8px; border-radius: 6px; margin-top: 4px; font-size: 11px; line-height: 1.4; word-break: break-word;">
+                        <span style="color: #7f8c8d; display:inline-block; width: 50px;">ที่ถูกต้อง:</span> ${sysHi}<br>
+                        <span style="color: #7f8c8d; display:inline-block; width: 50px;">ใบเสร็จ:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความ</span>'}
                     </div>
                 </div>`;
         }
@@ -552,55 +563,56 @@
             let aiHi = highlightDiff(addressAnalysis.bestSnippet, addressToMatch);
             missingDetailsHtml += `
                 <div>
-                    <strong style="color: #2c3e50;">📍 จุดที่พบปัญหา (ที่อยู่):</strong><br>
-                    <div style="background: #fff5f5; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 13px; line-height: 1.6;">
-                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">ที่ถูกต้อง:</span> ${sysHi}<br>
-                        <span style="color: #7f8c8d; display:inline-block; width: 60px;">ในใบเสร็จ:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความที่ใกล้เคียง</span>'}
+                    <strong style="color: #2c3e50; font-size:13px;">📍 ที่อยู่:</strong><br>
+                    <div style="background: #fff5f5; padding: 6px 8px; border-radius: 6px; margin-top: 4px; font-size: 11px; line-height: 1.4; word-break: break-word;">
+                        <span style="color: #7f8c8d; display:inline-block; width: 50px;">ที่ถูกต้อง:</span> ${sysHi}<br>
+                        <span style="color: #7f8c8d; display:inline-block; width: 50px;">ใบเสร็จ:</span> ${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความ</span>'}
                     </div>
                 </div>`;
         }
 
         let missingWordsHtml = '';
         if (missingDetailsHtml !== '') {
-            missingWordsHtml = `<div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left; line-height: 1.5;">${missingDetailsHtml}</div>`;
+            missingWordsHtml = `<div style="margin-top: 12px; padding: 10px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left;">${missingDetailsHtml}</div>`;
         }
 
-        let companyHeaderHtml = `<div style="background-color:#eef2ff; padding:10px; border-radius:8px; margin-bottom:15px; text-align:left; border:1px solid #c7d2fe;">
-            <strong style="color:#4361ee; font-size:15px;">ตรวจสอบกับบริษัท:</strong><br>
-            <span style="font-size:14px; color:#1e293b;">${companyNameToMatch}</span>
+        // ลดขนาดฟอนต์หัวข้อบริษัท
+        let companyHeaderHtml = `<div style="background-color:#eef2ff; padding:8px 10px; border-radius:8px; margin-bottom:12px; text-align:center; border:1px solid #c7d2fe;">
+            <span style="font-size:12px; color:#4361ee;">กำลังตรวจสอบบัญชี</span><br>
+            <strong style="font-size:13px; color:#1e293b;">${companyNameToMatch}</strong>
         </div>`;
 
         // ตรวจสอบเงื่อนไขการให้ผ่าน (ต้องผ่าน 100% หรือถ้าไม่ใช่ให้พนักงานตรวจสอบเอง)
         if (!taxIdPassed) {
-            let taxErrorHtml = `<div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
-                <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
-                • หาเลขนี้บนเอกสารไม่พบ: <span style="font-weight:bold;">${taxIdToMatch}</span>
+            let taxErrorHtml = `<div style="margin-top: 12px; background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 12px;">
+                <strong>❌ เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
+                ระบบหาเลข <span style="font-weight:bold;">${taxIdToMatch}</span> ไม่พบบนเอกสาร
             </div>`;
             Swal.fire({
-                icon: 'error', // สีแดง
-                title: 'ไม่ผ่าน: ข้อมูลไม่ตรงกัน!',
-                html: companyHeaderHtml + '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ หรือรูปภาพอาจไม่ชัดเจน</div>' + taxErrorHtml + amountWarningHtml,
-                confirmButtonColor: '#e74c3c', // ปุ่มสีแดง
-                confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
+                icon: 'error',
+                title: 'ข้อมูลไม่ตรงกัน!',
+                html: companyHeaderHtml + '<div style="font-size: 14px; color:#c0392b; font-weight:500;">ตรวจไม่พบเลขผู้เสียภาษี หรือรูปไม่ชัดเจน</div>' + taxErrorHtml + amountWarningHtml,
+                confirmButtonColor: '#e74c3c',
+                confirmButtonText: 'ตรวจสอบด้วยตนเอง'
             }).then(() => { resetForm(); });
 
         } else if (lowestScore === 1.0) {
             Swal.fire({
-                icon: 'success', // สีเขียว
-                title: 'ผ่าน: ข้อมูลถูกต้อง 100%',
-                html: companyHeaderHtml + '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">✅ ข้อมูลบัญชีบนเอกสารตรงกับในระบบทุกประการ</div>' + amountWarningHtml,
-                confirmButtonColor: '#2ecc71', // ปุ่มสีเขียว
+                icon: 'success',
+                title: 'ข้อมูลถูกต้อง 100%',
+                html: companyHeaderHtml + '<div style="font-size: 14px; color:#27ae60; font-weight:600;">✅ ข้อมูลบนเอกสารตรงกับระบบทุกประการ</div>' + amountWarningHtml,
+                confirmButtonColor: '#2ecc71',
                 confirmButtonText: 'ตกลง'
             }).then(() => { resetForm(); });
 
         } else {
-            // กรณีที่มีข้อผิดพลาดแม้แต่นิดเดียว (คะแนนไม่ถึง 1.0)
+            // กรณีมีข้อผิดพลาดแม้แต่นิดเดียว
             Swal.fire({
-                icon: 'error', // สีแดงทั้งหมด
-                title: 'ไม่ผ่าน: ข้อมูลไม่ตรง หรือ รูปไม่ชัดเจน',
-                html: companyHeaderHtml + `<div style="font-size: 15px; color:#c0392b; font-weight:bold;">❌ ตรวจพบข้อมูลบางส่วนไม่ตรงกับระบบ หรือ AI อาจอ่านตัวอักษรได้ไม่ชัดเจน</div>${missingWordsHtml}` + amountWarningHtml,
-                confirmButtonColor: '#e74c3c', // ปุ่มสีแดง
-                confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
+                icon: 'error',
+                title: 'ข้อมูลไม่ตรง / รูปไม่ชัด',
+                html: companyHeaderHtml + `<div style="font-size: 14px; color:#c0392b; font-weight:500;">❌ ข้อมูลบางส่วนไม่ตรง หรือ AI อ่านได้ไม่ครบถ้วน</div>${missingWordsHtml}` + amountWarningHtml,
+                confirmButtonColor: '#e74c3c',
+                confirmButtonText: 'ตรวจสอบด้วยตนเอง'
             }).then(() => { resetForm(); });
         }
     }
