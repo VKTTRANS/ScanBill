@@ -145,6 +145,15 @@
         button.submit-btn:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ปรับแต่งขนาด popup ของ SweetAlert ให้ไอคอนเล็กลง */
+        .swal2-icon {
+            transform: scale(0.65); /* ลดขนาดไอคอน */
+            margin: 0 auto -10px auto !important; /* ดึงข้อความให้ชิดไอคอนมากขึ้น */
+        }
+        .swal2-title {
+            font-size: 24px !important;
+        }
     </style>
 </head>
 <body>
@@ -567,29 +576,29 @@
                 • หาเลขนี้บนเอกสารไม่พบ: <span style="font-weight:bold;">${taxIdToMatch}</span>
             </div>`;
             Swal.fire({
-                icon: 'error',
+                icon: 'error', // สีแดง
                 title: 'ไม่ผ่าน: ข้อมูลไม่ตรงกัน!',
                 html: companyHeaderHtml + '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ หรือรูปภาพอาจไม่ชัดเจน</div>' + taxErrorHtml + amountWarningHtml,
-                confirmButtonColor: '#e74c3c',
+                confirmButtonColor: '#e74c3c', // ปุ่มสีแดง
                 confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
             }).then(() => { resetForm(); });
 
         } else if (lowestScore === 1.0) {
             Swal.fire({
-                icon: 'success',
-                title: 'ตรวจสอบผ่าน: ข้อมูลถูกต้อง 100%',
+                icon: 'success', // สีเขียว
+                title: 'ผ่าน: ข้อมูลถูกต้อง 100%',
                 html: companyHeaderHtml + '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">✅ ข้อมูลบัญชีบนเอกสารตรงกับในระบบทุกประการ</div>' + amountWarningHtml,
-                confirmButtonColor: '#2ecc71',
+                confirmButtonColor: '#2ecc71', // ปุ่มสีเขียว
                 confirmButtonText: 'ตกลง'
             }).then(() => { resetForm(); });
 
         } else {
             // กรณีที่มีข้อผิดพลาดแม้แต่นิดเดียว (คะแนนไม่ถึง 1.0)
             Swal.fire({
-                icon: 'warning',
+                icon: 'error', // สีแดงทั้งหมด
                 title: 'ไม่ผ่าน: ข้อมูลไม่ตรง หรือ รูปไม่ชัดเจน',
-                html: companyHeaderHtml + `<div style="font-size: 15px; color:#c0392b; font-weight:bold;">⚠️ ตรวจพบข้อมูลบางส่วนไม่ตรงกับระบบ หรือ AI อาจอ่านตัวอักษรได้ไม่ชัดเจน</div>${missingWordsHtml}` + amountWarningHtml,
-                confirmButtonColor: '#f39c12',
+                html: companyHeaderHtml + `<div style="font-size: 15px; color:#c0392b; font-weight:bold;">❌ ตรวจพบข้อมูลบางส่วนไม่ตรงกับระบบ หรือ AI อาจอ่านตัวอักษรได้ไม่ชัดเจน</div>${missingWordsHtml}` + amountWarningHtml,
+                confirmButtonColor: '#e74c3c', // ปุ่มสีแดง
                 confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
             }).then(() => { resetForm(); });
         }
