@@ -50,12 +50,13 @@
         .warning-note {
             background-color: #f8f9fc;
             color: #2c3e50;
-            padding: 12px 15px;
+            padding: 15px;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 14px;
             text-align: left;
             margin-bottom: 25px;
             border: 1px solid #dcdde1;
+            border-left: 6px solid #e74c3c;
             line-height: 1.6;
         }
 
@@ -155,8 +156,15 @@
     </div>
 
     <div class="warning-note">
-        <strong>⚠️ ระบบ AI ตรวจสอบเอกสาร:</strong> ระวังตัวอักษรที่คล้ายกัน เช่น <strong>0 (ศูนย์)/O (โอ)</strong> และ <strong>1/I/l</strong><br>
-        <span style="color:#d35400; font-weight:600;">📌 กฎเหล็ก:</span> ระบบจะค้นหาเลขผู้เสียภาษี 13 หลักบนบิลให้อัตโนมัติ หากไม่พบข้อมูลสามารถค้นหาชื่อบริษัทเองได้
+        <strong style="color: #e74c3c; font-size: 16px;">⚠️ ข้อควรระวังในการตรวจสอบเอกสาร</strong>
+        <div style="background: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px solid #ffeeba;">
+            <strong style="color: #d35400;">🔍 โปรดระวังตัวอักษรที่คล้ายกัน (อาจทำให้ AI อ่านผิดเพี้ยน):</strong>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px; font-weight: 600; color: #c0392b;">
+                <li>เลข 0 (ศูนย์) กับ ตัวอักษร O (โอ)</li>
+                <li>เลข 1 (หนึ่ง) กับ ตัวอักษร I (ไอใหญ่) หรือ l (แอลเล็ก)</li>
+            </ul>
+        </div>
+        <span style="color:#2980b9; font-weight:600;">📌 กฎเหล็ก:</span> ระบบจะค้นหาเลขผู้เสียภาษี 13 หลักบนบิลให้อัตโนมัติ หากไม่พบข้อมูลสามารถค้นหาชื่อบริษัทเองได้
     </div>
 
     <div class="upload-container">
@@ -552,6 +560,7 @@
             <span style="font-size:14px; color:#1e293b;">${companyNameToMatch}</span>
         </div>`;
 
+        // ตรวจสอบเงื่อนไขการให้ผ่าน (ต้องผ่าน 100% หรือถ้าไม่ใช่ให้พนักงานตรวจสอบเอง)
         if (!taxIdPassed) {
             let taxErrorHtml = `<div style="margin-top: 15px; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 14px;">
                 <strong>❌ ไม่ผ่าน: เลขประจำตัวผู้เสียภาษีไม่ตรง</strong><br>
@@ -559,8 +568,8 @@
             </div>`;
             Swal.fire({
                 icon: 'error',
-                title: 'ข้อมูลไม่ตรงกัน!',
-                html: companyHeaderHtml + '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ</div>' + taxErrorHtml + amountWarningHtml,
+                title: 'ไม่ผ่าน: ข้อมูลไม่ตรงกัน!',
+                html: companyHeaderHtml + '<div style="font-size: 15px;">ระบบตรวจไม่พบเลขผู้เสียภาษีของบริษัทนี้บนใบเสร็จ หรือรูปภาพอาจไม่ชัดเจน</div>' + taxErrorHtml + amountWarningHtml,
                 confirmButtonColor: '#e74c3c',
                 confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
             }).then(() => { resetForm(); });
@@ -568,41 +577,20 @@
         } else if (lowestScore === 1.0) {
             Swal.fire({
                 icon: 'success',
-                title: 'ถูกต้องครบถ้วน 100%!',
-                html: companyHeaderHtml + '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">🥇 ข้อมูลบัญชีตรงกับระบบเป๊ะทุกตัวอักษร</div>' + amountWarningHtml,
+                title: 'ตรวจสอบผ่าน: ข้อมูลถูกต้อง 100%',
+                html: companyHeaderHtml + '<div style="font-size: 15px; color:#27ae60; font-weight:bold;">✅ ข้อมูลบัญชีบนเอกสารตรงกับในระบบทุกประการ</div>' + amountWarningHtml,
                 confirmButtonColor: '#2ecc71',
                 confirmButtonText: 'ตกลง'
             }).then(() => { resetForm(); });
 
-        } else if (lowestScore >= 0.90) {
-            let accuracyPercent = Math.round(lowestScore * 100);
-            Swal.fire({
-                icon: 'info',
-                title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
-                html: companyHeaderHtml + `<div style="font-size: 15px; color:#2980b9; font-weight:bold;">🥈 ข้อมูลส่วนใหญ่ถูกต้อง แต่อาจมีรอยเปื้อนหรือตัวอักษรเพี้ยน</div>${missingWordsHtml}` + amountWarningHtml,
-                confirmButtonColor: '#3498db',
-                confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
-            }).then(() => { resetForm(); });
-
-        } else if (lowestScore >= 0.80) {
-            let accuracyPercent = Math.round(lowestScore * 100);
+        } else {
+            // กรณีที่มีข้อผิดพลาดแม้แต่นิดเดียว (คะแนนไม่ถึง 1.0)
             Swal.fire({
                 icon: 'warning',
-                title: 'ตรวจสอบผ่าน ' + accuracyPercent + '%',
-                html: companyHeaderHtml + `<div style="font-size: 15px; color:#d35400; font-weight:bold;">🥉 ตรวจพบข้อมูลถูกต้องบางส่วนเท่านั้น</div>${missingWordsHtml}
-                       <div style="font-size: 14px; margin-top:10px; color:#c0392b; font-weight:bold;">⚠️ กรุณาตรวจสอบโดยละเอียด! ระวังเลือกข้อมูลผิดสาขา</div>` + amountWarningHtml,
+                title: 'ไม่ผ่าน: ข้อมูลไม่ตรง หรือ รูปไม่ชัดเจน',
+                html: companyHeaderHtml + `<div style="font-size: 15px; color:#c0392b; font-weight:bold;">⚠️ ตรวจพบข้อมูลบางส่วนไม่ตรงกับระบบ หรือ AI อาจอ่านตัวอักษรได้ไม่ชัดเจน</div>${missingWordsHtml}` + amountWarningHtml,
                 confirmButtonColor: '#f39c12',
-                confirmButtonText: 'ยืนยันความถูกต้อง (ตรวจสอบแล้ว)'
-            }).then(() => { resetForm(); });
-
-        } else {
-            let accuracyPercent = Math.round(lowestScore * 100);
-            Swal.fire({
-                icon: 'error',
-                title: 'ข้อมูลไม่ผ่านเกณฑ์!',
-                html: companyHeaderHtml + `<div style="font-size: 15px;">คะแนนความแม่นยำต่ำเกินไป (${accuracyPercent}%) หรือ <strong>มีตัวเลขสาขา/ที่อยู่ไม่ตรงกัน</strong> ระบบจึงไม่อนุมัติให้ผ่าน</div>${missingWordsHtml}` + amountWarningHtml,
-                confirmButtonColor: '#e74c3c',
-                confirmButtonText: 'ส่งให้พนักงานตรวจสอบเอง'
+                confirmButtonText: 'ให้พนักงานตรวจสอบเอง'
             }).then(() => { resetForm(); });
         }
     }
