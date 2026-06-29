@@ -64,17 +64,26 @@
 
         .disclaimer-text { text-align: center; margin-top: 15px; font-size: 11px; color: #7f8c8d; line-height: 1.4; }
 
-        /* Admin Styles */
-        .admin-table-container { overflow-x: auto; margin-top: 15px; }
+        .admin-controls { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+        .admin-search { flex-grow: 1; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; transition: 0.2s;}
+        .admin-search:focus { border-color: var(--primary); }
+        
+        .admin-table-container { overflow-x: auto; margin-top: 10px; }
         .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .admin-table th, .admin-table td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
         .admin-table th { background-color: #f8f9fc; color: var(--primary); white-space: nowrap; }
+        
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { background-color: #eef2ff !important; }
+        .sort-icon { font-size: 10px; margin-left: 4px; color: #a0aec0; }
+        .sort-active { color: var(--primary); }
+
         .btn-sm { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; color: white; margin-right: 4px; font-family: inherit;}
         .btn-edit { background-color: #f39c12; }
         .btn-del { background-color: #e74c3c; }
         .btn-add-new { background-color: #2ecc71; color: white; padding: 10px; border-radius: 8px; border: none; cursor: pointer; width: 100%; font-family: inherit; font-size: 14px; margin-bottom: 10px; }
 
-        @media (max-width: 480px) { .container { padding: 15px 10px; } .header h2 { font-size: 18px; } }
+        @media (max-width: 480px) { .container { padding: 15px 10px; } .header h2 { font-size: 18px; } .admin-controls { flex-direction: column-reverse; } .admin-controls .action-btn { width: 100%; } .admin-search { width: 95%; } }
     </style>
 </head>
 <body>
@@ -138,11 +147,25 @@
         </div>
         
         <button class="btn-add-new" onclick="openAddModal()">+ เพิ่มบริษัทใหม่</button>
-        <button class="action-btn" style="width:100%; flex-direction:row; padding:10px;" onclick="closeAdmin()">กลับหน้าสแกนเอกสาร</button>
+        
+        <div class="admin-controls">
+            <button class="action-btn" style="flex: 0 0 auto; padding: 10px 15px;" onclick="closeAdmin()">กลับหน้าสแกนเอกสาร</button>
+            <input type="text" id="adminSearchInput" class="admin-search" placeholder="🔍 ค้นหาชื่อบริษัท หรือ เลขผู้เสียภาษี..." onkeyup="filterAndRenderAdminTable()">
+        </div>
         
         <div class="admin-table-container">
             <table class="admin-table">
-                <thead><tr><th>ชื่อบริษัท</th><th>เลขผู้เสียภาษี</th><th>จัดการ</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortAdminTable('CompanyName')">
+                            ชื่อบริษัท <span id="sortIcon-CompanyName" class="sort-icon"></span>
+                        </th>
+                        <th class="sortable" onclick="sortAdminTable('TaxID')">
+                            เลขผู้เสียภาษี <span id="sortIcon-TaxID" class="sort-icon"></span>
+                        </th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
                 <tbody id="adminTableBody"></tbody>
             </table>
         </div>
@@ -157,6 +180,10 @@
     let globalData = [];
     let globalSelect2Data = [];
     let currentBase64Array = [];
+    
+    // ตัวแปรสำหรับจัดเรียงข้อมูล
+    let sortCol = '';
+    let sortAsc = true;
 
     window.onload = function() { fetchDataFromSheet(); };
 
@@ -172,13 +199,12 @@
                 globalData.forEach((item, index) => {
                     globalSelect2Data.push({ id: index.toString(), text: item["CompanyName"] || `รายการที่ ${index + 1}` });
                 });
-                renderAdminTable(); 
+                filterAndRenderAdminTable(); 
                 Swal.close();
             } else { Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถดึงข้อมูลได้', 'error'); }
         }).catch(err => Swal.fire('การเชื่อมต่อล้มเหลว', 'โปรดตรวจสอบอินเทอร์เน็ต', 'error'));
     }
 
-    // --- ส่วนของ Admin ---
     function checkAdminPassword() {
         Swal.fire({
             title: 'เข้าสู่โหมด Admin',
@@ -191,6 +217,7 @@
                     document.getElementById('mainScannerView').style.display = 'none';
                     document.getElementById('adminPanelView').style.display = 'block';
                     document.querySelector('.admin-btn-top').style.display = 'none';
+                    filterAndRenderAdminTable();
                 } else { Swal.fire('รหัสผ่านผิด', '', 'error'); }
             }
         });
@@ -202,17 +229,49 @@
         document.querySelector('.admin-btn-top').style.display = 'block';
     }
 
-    function renderAdminTable() {
+    function sortAdminTable(col) {
+        if (sortCol === col) {
+            sortAsc = !sortAsc;
+        } else {
+            sortCol = col;
+            sortAsc = true;
+        }
+        filterAndRenderAdminTable();
+    }
+
+    function filterAndRenderAdminTable() {
+        const searchTerm = (document.getElementById('adminSearchInput').value || '').toLowerCase();
+        
+        let filteredData = globalData.filter(item => {
+            const name = (item.CompanyName || '').toLowerCase();
+            const tax = (item.TaxID || '').toLowerCase();
+            return name.includes(searchTerm) || tax.includes(searchTerm);
+        });
+
+        if (sortCol) {
+            filteredData.sort((a, b) => {
+                let valA = (a[sortCol] || '').toString();
+                let valB = (b[sortCol] || '').toString();
+                // ใช้ 'th' เพื่อให้เรียงภาษาไทย (ก-ฮ) ได้ถูกต้อง
+                return sortAsc ? valA.localeCompare(valB, 'th') : valB.localeCompare(valA, 'th');
+            });
+        }
+
+        document.getElementById('sortIcon-CompanyName').innerHTML = sortCol === 'CompanyName' ? (sortAsc ? '▲' : '▼') : '';
+        document.getElementById('sortIcon-TaxID').innerHTML = sortCol === 'TaxID' ? (sortAsc ? '▲' : '▼') : '';
+        document.getElementById('sortIcon-CompanyName').className = sortCol === 'CompanyName' ? 'sort-icon sort-active' : 'sort-icon';
+        document.getElementById('sortIcon-TaxID').className = sortCol === 'TaxID' ? 'sort-icon sort-active' : 'sort-icon';
+
         const tbody = document.getElementById('adminTableBody');
         tbody.innerHTML = '';
-        globalData.forEach((item, index) => {
+        filteredData.forEach((item) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${item.CompanyName || '-'}</td>
                 <td>${item.TaxID || '-'}</td>
                 <td style="white-space: nowrap;">
-                    <button class="btn-sm btn-edit" onclick="openEditModal(${index})">แก้ไข</button>
-                    <button class="btn-sm btn-del" onclick="confirmDelete(${index})">ลบ</button>
+                    <button class="btn-sm btn-edit" onclick="openEditModal(${item._rowIndex})">แก้ไข</button>
+                    <button class="btn-sm btn-del" onclick="confirmDelete(${item._rowIndex})">ลบ</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -225,7 +284,7 @@
             const reqData = { action: action, ...payload };
             const res = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // กันปัญหา CORS
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                 body: JSON.stringify(reqData)
             });
             const result = await res.json();
@@ -259,8 +318,10 @@
         });
     }
 
-    function openEditModal(index) {
-        const item = globalData[index];
+    function openEditModal(rowIndex) {
+        const item = globalData.find(x => x._rowIndex === rowIndex);
+        if (!item) return;
+        
         Swal.fire({
             title: 'แก้ไขข้อมูล',
             html: `
@@ -283,8 +344,10 @@
         });
     }
 
-    function confirmDelete(index) {
-        const item = globalData[index];
+    function confirmDelete(rowIndex) {
+        const item = globalData.find(x => x._rowIndex === rowIndex);
+        if (!item) return;
+
         Swal.fire({
             title: 'ยืนยันการลบ?',
             text: `ลบข้อมูล ${item.CompanyName}?`,
@@ -296,7 +359,6 @@
         });
     }
 
-    // --- ส่วนสแกน AI (เดิม) ---
     function checkSubmitButton() { document.getElementById("submitBtn").disabled = currentBase64Array.length === 0; }
     function previewFile(inputElement) {
         const files = inputElement.files;
