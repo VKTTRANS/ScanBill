@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ระบบตรวจสอบและสแกนเอกสารด้วย AI</title>
     
-    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -21,116 +20,56 @@
             --text-main: #2b2d42;
             --text-muted: #6c757d;
             --border-light: #e2e8f0;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-md: 0 10px 25px rgba(67, 97, 238, 0.1);
         }
 
         body { 
             font-family: 'Kanit', sans-serif; 
             background-color: var(--bg-color); 
-            margin: 0; 
-            padding: 10px; 
-            color: var(--text-main); 
+            margin: 0; padding: 15px; color: var(--text-main); 
         }
 
         .container { 
-            max-width: 700px; 
-            margin: 0 auto; 
-            background: var(--card-bg); 
-            padding: 20px 15px; 
-            border-radius: 16px; 
-            box-shadow: var(--shadow-md); 
+            max-width: 600px; margin: 0 auto; background: var(--card-bg); 
+            padding: 25px 20px; border-radius: 16px; box-shadow: var(--shadow-md); 
         }
 
-        .header { text-align: center; margin-bottom: 12px; }
-        .header h2 { color: var(--primary); margin: 0 0 2px 0; font-size: 20px; font-weight: 600; }
-        .header p { color: var(--text-muted); margin: 0; font-size: 13px; }
-
-        .warning-note {
-            background-color: #f8f9fc;
-            color: #2c3e50;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: left;
-            margin-bottom: 15px;
-            border: 1px solid #dcdde1;
-            border-left: 5px solid #e74c3c;
-            line-height: 1.4;
-        }
-
-        .select2-container { width: 100% !important; }
-        .select2-container--default .select2-selection--single {
-            height: 45px;
-            border-radius: 10px;
-            border: 2px solid var(--border-light);
-            background-color: #fcfcfc;
-            display: flex;
-            align-items: center;
-        }
-        .select2-container--default.select2-container--open .select2-selection--single {
-            border-color: var(--primary);
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            width: 100%; padding-left: 14px; padding-right: 40px; color: var(--text-main); font-size: 14px; line-height: normal;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #999; }
-        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 45px; right: 10px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h2 { color: var(--primary); margin: 0 0 5px 0; font-size: 22px; }
         
-        .select2-dropdown {
-            font-family: 'Kanit', sans-serif; border: 2px solid var(--primary); border-radius: 10px;
-        }
-        .select2-search__field { font-family: 'Kanit', sans-serif; font-size: 14px !important; border-radius: 6px !important; padding: 6px !important; }
-        .select2-results__option { padding: 8px 12px; font-size: 13px; }
-        .select2-container--default .select2-results__option--highlighted[aria-selected] { background-color: var(--primary); color: white; }
-
         .upload-container {
-            border: 2px dashed #bcccff; padding: 12px 10px; border-radius: 12px; 
-            background-color: #f4f7ff; margin-bottom: 15px; text-align: center;
+            border: 2px dashed #bcccff; padding: 20px; border-radius: 12px; 
+            background-color: #f4f7ff; margin-bottom: 20px; text-align: center;
         }
-        .upload-header { margin: 0 0 8px 0; color: var(--primary); font-weight: 500; font-size: 13px; }
 
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;}
         .action-btn {
             background-color: white; border: 1px solid var(--primary); color: var(--primary);
-            padding: 8px; border-radius: 10px; cursor: pointer; display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-            gap: 4px; font-size: 12px; font-weight: 500; box-shadow: var(--shadow-sm);
+            padding: 10px; border-radius: 10px; cursor: pointer; display: flex;
+            flex-direction: column; align-items: center; gap: 5px; font-size: 14px; font-weight: 500;
         }
         .action-btn:hover { background-color: var(--primary); color: white; }
-        .action-btn svg { width: 22px; height: 22px; }
+        
+        #previewContainer { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .preview-img { max-height: 100px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
+        .submit-btn { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white; border: none; padding: 15px; font-size: 16px; font-family: inherit;
+            border-radius: 10px; cursor: pointer; width: 100%; font-weight: 500;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* SweetAlert Customization */
+        .swal2-popup { font-family: 'Kanit', sans-serif !important; }
+        .custom-alert-box { 
+            background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; 
+            padding: 15px; margin-top: 15px; text-align: left; font-size: 14px;
+        }
+        .highlight-error { color: #e74c3c; font-weight: bold; }
+        
         input[type="file"] { display: none; }
-
-        #previewContainer { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
-        .preview-img { max-width: 100%; max-height: 80px; border-radius: 6px; box-shadow: var(--shadow-sm); object-fit: contain; }
-
-        button.submit-btn { 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-            color: white; border: none; padding: 12px; font-size: 15px; font-family: 'Kanit', sans-serif;
-            border-radius: 10px; cursor: pointer; width: 100%; font-weight: 500; transition: all 0.2s; 
-            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.2); display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        button.submit-btn:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
-
-        /* ปรับแต่ง SweetAlert สำหรับหน้าจอมือถือ */
-        .swal2-popup { padding: 1.2em 1em !important; width: 95% !important; max-width: 500px !important; }
-        .swal2-icon { transform: scale(0.6); margin: 0 auto -15px auto !important; }
-        .swal2-title { font-size: 18px !important; padding-top: 0 !important; line-height: 1.4 !important; }
-        .swal2-html-container { margin: 12px 0 0 0 !important; overflow: hidden; }
-
-        @media (max-width: 480px) {
-            body { padding: 5px; }
-            .container { padding: 15px 10px; }
-            .header h2 { font-size: 18px; }
-            .header p { font-size: 12px; }
-            .warning-note { padding: 8px; margin-bottom: 12px; }
-            .upload-container { padding: 10px; margin-bottom: 12px; }
-            .action-btn { padding: 8px; font-size: 12px; gap: 4px; }
-            .action-btn svg { width: 20px; height: 20px; }
-            button.submit-btn { padding: 10px; font-size: 14px; }
-        }
     </style>
 </head>
 <body>
@@ -138,471 +77,199 @@
 <div class="container">
     <div class="header">
         <h2>ระบบ AI สแกนเอกสาร</h2>
-        <p>ตรวจสอบความถูกต้องของเอกสารด้วย AI</p>
-    </div>
-
-    <div class="warning-note">
-        <div style="font-size: 13px; font-weight: 600; color: #e74c3c;">⚠️ ข้อควรระวังในการตรวจสอบ</div>
-        <div style="background: #fff3cd; color: #856404; padding: 8px; border-radius: 6px; margin: 6px 0; border: 1px solid #ffeeba;">
-            <strong style="color: #d35400; font-size: 12px;">🔍 ระวังตัวอักษรคล้ายกัน:</strong>
-            <ul style="margin: 2px 0 0 0; padding-left: 20px; font-weight: 500; color: #c0392b; font-size: 12px;">
-                <li>เลข 0 (ศูนย์) กับ ตัวอักษร O (โอ)</li>
-                <li>เลข 8 (แปด) กับ ตัวอักษร B (บี)</li>
-                <li>เลข 1 (หนึ่ง) กับ ตัวอักษร I หรือ l</li>
-            </ul>
-        </div>
-        <div style="font-size: 12px; line-height: 1.5;">
-            <span style="color:#2980b9; font-weight:600;">📌 กฎเหล็ก:</span> ระบบหาเลข 13 หลักอัตโนมัติ หากไม่พบให้พิมพ์ค้นหาบริษัทเอง
-        </div>
+        <p style="color: var(--text-muted); font-size: 14px;">ตรวจสอบความถูกต้องของเอกสารอัตโนมัติ</p>
     </div>
 
     <div class="upload-container">
-        <p class="upload-header">นำเข้าเอกสารเพื่อตรวจสอบ</p>
-        
         <div class="action-buttons">
             <div class="action-btn" onclick="document.getElementById('cameraInput').click()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                ถ่ายรูปใหม่
+                📸 ถ่ายรูปใหม่
             </div>
-            
             <div class="action-btn" onclick="document.getElementById('galleryInput').click()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                อัปโหลดรูปภาพ
+                🖼️ อัปโหลดรูป
             </div>
         </div>
-
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="previewFile(this)">
-        <input type="file" id="galleryInput" accept="image/*" multiple onchange="previewFile(this)">
-        
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleFiles(this)">
+        <input type="file" id="galleryInput" accept="image/*" multiple onchange="handleFiles(this)">
         <div id="previewContainer"></div>
     </div>
 
-    <button id="submitBtn" class="submit-btn" onclick="processDocument()" disabled>
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-        เริ่มสแกนตรวจสอบ
+    <button id="submitBtn" class="submit-btn" onclick="startScan()" disabled>
+        🔍 เริ่มสแกนตรวจสอบ
     </button>
 </div>
 
 <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
-    const VISION_API_KEY = "AIzaSyAUWjUZ43ADkKVCKpefv-d8Fcf20RCCtxw";
-    let globalData = [];
-    let globalSelect2Data = [];
-    let currentBase64Array = [];
+    // --- ตั้งค่าระบบ ---
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxNJyTVwNaGcfKdF9OTUiXoXxeUJDMjj4t9BAyZfIAedibQPni-xHsL41TACbbOGmL5Xw/exec";
+    const VISION_API_KEY = "AIzaSyAUWjUZ43ADkKVCKpefv-d8Fcf20RCCtxw"; // ⚠️ ควรย้ายไปไว้ฝั่ง Backend ในอนาคต
+    
+    let dbData = [];
+    let select2Options = [];
+    let imageBase64List = [];
 
-    function checkSubmitButton() {
-        document.getElementById("submitBtn").disabled = currentBase64Array.length === 0;
-    }
-
-    function fetchDataFromSheet() {
-        Swal.fire({
-            title: 'กำลังเชื่อมต่อระบบ...',
-            text: 'กำลังดึงฐานข้อมูลบริษัทล่าสุด กรุณารอสักครู่',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading() }
-        });
-
-        fetch(`${GAS_WEB_APP_URL}?action=getData&sheetName=Setting`)
-        .then(response => response.json())
-        .then(res => {
-            if(res.status === "success") {
-                globalData = res.data;
-                globalSelect2Data = [{ id: '', text: '' }]; 
-                
-                globalData.forEach((item, index) => {
-                    globalSelect2Data.push({
-                        id: index.toString(),
-                        text: Object.values(item)[0] || `รายการที่ ${index + 1}`
-                    });
-                });
+    // --- เริ่มต้นโหลดข้อมูล ---
+    window.onload = async () => {
+        Swal.fire({ title: 'กำลังดึงฐานข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            const res = await fetch(`${GAS_URL}?action=getData&sheetName=Setting`);
+            const json = await res.json();
+            if(json.status === "success") {
+                dbData = json.data;
+                select2Options = dbData.map((item, idx) => ({ id: idx, text: item["CompanyName"] || `บริษัทที่ ${idx + 1}` }));
+                select2Options.unshift({ id: '', text: '' }); // Placeholder
                 Swal.close();
-            } else {
-                Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถดึงข้อมูลจาก Sheet ได้', 'error');
             }
-        }).catch(err => {
-            console.error(err);
-            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อล้มเหลว', text: 'ไม่สามารถดึงฐานข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต', confirmButtonColor: '#4361ee' });
-        });
-    }
-
-    window.onload = function() { fetchDataFromSheet(); };
-
-    function previewFile(inputElement) {
-        const files = inputElement.files;
-        const previewContainer = document.getElementById('previewContainer');
-        previewContainer.innerHTML = ""; 
-        currentBase64Array = [];
-
-        if(inputElement.id === 'cameraInput') {
-            document.getElementById('galleryInput').value = "";
-        } else {
-            document.getElementById('cameraInput').value = "";
+        } catch (err) {
+            Swal.fire('ผิดพลาด', 'ดึงฐานข้อมูลไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ', 'error');
         }
+    };
 
-        if (files && files.length > 0) {
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                    const img = document.createElement('img');
-                    img.src = reader.result;
-                    img.className = 'preview-img';
-                    previewContainer.appendChild(img);
-                    currentBase64Array.push(reader.result.split(',')[1]);
-                    checkSubmitButton();
-                }
-                reader.readAsDataURL(file);
-            });
-        } else {
-            checkSubmitButton();
-        }
+    // --- จัดการไฟล์รูปภาพ ---
+    function handleFiles(input) {
+        const preview = document.getElementById('previewContainer');
+        preview.innerHTML = ""; 
+        imageBase64List = [];
+
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-img';
+                preview.appendChild(img);
+                imageBase64List.push(e.target.result.split(',')[1]);
+                document.getElementById("submitBtn").disabled = imageBase64List.length === 0;
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
-    function highlightDiff(sourceText, compareText) {
-        if (!sourceText) return "";
-        if (!compareText) return `<span style="color: #e74c3c; font-weight: bold;">${sourceText}</span>`;
-        let sourceWords = sourceText.split(/\s+/);
-        let cleanTextB = compareText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-        let result = [];
-        sourceWords.forEach(w => {
-            let cleanW = w.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-            if (cleanW.length > 0 && !cleanTextB.includes(cleanW)) {
-                result.push(`<span style="color: #e74c3c; font-weight: bold;">${w}</span>`);
-            } else {
-                result.push(`<span style="color: #555;">${w}</span>`);
-            }
-        });
-        return result.join(' ');
-    }
-
-    async function processDocument() {
-        const submitBtn = document.getElementById("submitBtn");
-        submitBtn.disabled = true;
-        
-        Swal.fire({
-            title: 'AI กำลังวิเคราะห์รูปภาพ...',
-            html: `<span style="font-size: 13px;">ค้นหาเลขผู้เสียภาษีบนเอกสาร ${currentBase64Array.length} ใบ</span>`,
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading() }
-        });
-
-        const requests = currentBase64Array.map(b64 => ({
-            image: { content: b64 },
-            features: [{ type: "TEXT_DETECTION" }]
-        }));
+    // --- เริ่มสแกน Vision API ---
+    async function startScan() {
+        document.getElementById("submitBtn").disabled = true;
+        Swal.fire({ title: 'AI กำลังวิเคราะห์...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
         try {
-            const visionResponse = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requests: requests })
-            });
+            const requests = imageBase64List.map(base64 => ({
+                image: { content: base64 },
+                features: [{ type: "TEXT_DETECTION" }]
+            }));
 
-            const visionData = await visionResponse.json();
+            const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`, {
+                method: 'POST', body: JSON.stringify({ requests })
+            });
+            const visionResult = await res.json();
             
-            if (visionData.responses && visionData.responses.some(r => r.error)) {
-                Swal.fire('ข้อผิดพลาด AI', 'มีปัญหาในการอ่านรูปภาพบางส่วน กรุณาลองใหม่', 'error');
-                submitBtn.disabled = false;
-                return;
-            }
+            // นำ Text จากทุกรูปมารวมกัน
+            const fullText = visionResult.responses
+                .map(r => r.fullTextAnnotation ? r.fullTextAnnotation.text : "")
+                .join("\n");
 
-            const detectedText = visionData.responses
-                                .map(r => r.fullTextAnnotation ? r.fullTextAnnotation.text : "")
-                                .join("\n");
-            
-            const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
+            analyzeExtractedText(fullText);
 
-            let matchingIndexes = [];
-            globalData.forEach((item, index) => {
-                const dbTaxId = item["TaxID"] ? item["TaxID"].toString().replace(/\D/g,'') : "";
-                if (dbTaxId && dbTaxId.length >= 10 && cleanDetectedTextNumbersOnly.includes(dbTaxId)) {
-                    matchingIndexes.push(index);
-                }
-            });
-
-            if (matchingIndexes.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'สแกนไม่พบเลข 13 หลัก',
-                    html: '<span style="font-size:13px;">รูปภาพอาจไม่ชัด หรือไม่มีข้อมูลในระบบ<br>คุณต้องการทำอย่างไร?</span>',
-                    showCancelButton: true,
-                    confirmButtonText: '🔍 เลือกบริษัทเอง',
-                    cancelButtonText: '❌ ปิด',
-                    confirmButtonColor: '#4361ee',
-                    cancelButtonColor: '#e74c3c'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        showManualSelectionPopup(detectedText, cleanDetectedTextNumbersOnly);
-                    } else {
-                        submitBtn.disabled = false;
-                    }
-                });
-            } else if (matchingIndexes.length === 1) {
-                const selectedItem = globalData[matchingIndexes[0]];
-                runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
-            } else {
-                let optionsHtml = '';
-                matchingIndexes.forEach(idx => {
-                    const comp = globalData[idx];
-                    const name = comp["CompanyName"] || Object.values(comp)[0];
-                    const addr = comp["Address"] || "";
-                    optionsHtml += `<button class="swal2-styled branch-select-btn" data-idx="${idx}" style="background-color:#4361ee; display:block; margin:8px auto; width:95%; text-align:left; padding:8px 10px; font-size:12px; border-radius:8px; color:white; border:none; cursor:pointer;"><strong>${name}</strong><br><small style="color:#e2e8f0; font-size:11px;">${addr}</small></button>`;
-                });
-
-                Swal.fire({
-                    title: 'พบข้อมูลหลายสาขา',
-                    html: `<div style="font-size:13px;">กรุณาเลือกสาขาที่ถูกต้อง:</div><div style="margin-top:8px;">${optionsHtml}</div>`,
-                    showConfirmButton: false,
-                    showCancelButton: true,
-                    cancelButtonText: 'ยกเลิก',
-                    didOpen: () => {
-                        const buttons = Swal.getHtmlContainer().querySelectorAll('.branch-select-btn');
-                        buttons.forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const idx = this.getAttribute('data-idx');
-                                Swal.close();
-                                runEvaluation(globalData[parseInt(idx)], detectedText, cleanDetectedTextNumbersOnly);
-                            });
-                        });
-                    }
-                });
-            }
-
-        } catch (error) {
-            console.error(error);
-            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับ AI ได้ กรุณาลองใหม่อีกครั้ง', 'error').then(() => {
-                submitBtn.disabled = false;
-            });
+        } catch (err) {
+            Swal.fire('ผิดพลาด', 'ระบบ AI ขัดข้อง กรุณาลองใหม่', 'error');
+            document.getElementById("submitBtn").disabled = false;
         }
     }
 
-    function showManualSelectionPopup(detectedText, cleanDetectedTextNumbersOnly) {
+    // --- ประมวลผลและค้นหา ---
+    function analyzeExtractedText(ocrText) {
+        const numbersOnly = ocrText.replace(/\D/g, '');
+        let matchedIndexes = [];
+
+        // หาเลข 13 หลัก
+        dbData.forEach((item, idx) => {
+            const taxId = (item["TaxID"] || "").toString().replace(/\D/g, '');
+            if (taxId.length >= 10 && numbersOnly.includes(taxId)) {
+                matchedIndexes.push(idx);
+            }
+        });
+
+        if (matchedIndexes.length === 0) {
+            promptManualSelect(ocrText);
+        } else if (matchedIndexes.length === 1) {
+            evaluateCompany(dbData[matchedIndexes[0]], ocrText);
+        } else {
+            // กรณีเจอหลายสาขา (ดึงตัวแรกมาเช็คก่อน หรือทำ UI ให้เลือกสาขาเพิ่มได้ที่นี่)
+            evaluateCompany(dbData[matchedIndexes[0]], ocrText);
+        }
+    }
+
+    // --- ให้ผู้ใช้เลือกเองกรณีหา TaxID ไม่เจอ ---
+    function promptManualSelect(ocrText) {
         Swal.fire({
-            title: 'เลือกบริษัทด้วยตนเอง',
-            html: '<div style="text-align:left; margin-bottom:10px; font-size:12px; color:#e74c3c;">⚠️ พิมพ์ค้นหาชื่อบริษัทที่ต้องการตรวจสอบ</div><select id="manualSelect2" style="width:100%"></select>',
-            showCancelButton: true,
-            confirmButtonText: 'ยืนยัน',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#4361ee',
+            icon: 'warning',
+            title: 'สแกนไม่พบเลขผู้เสียภาษี',
+            html: '<div style="margin-bottom:10px;">กรุณาเลือกบริษัทด้วยตนเอง</div><select id="companySelect" style="width:100%"></select>',
+            showCancelButton: true, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก',
             didOpen: () => {
-                $('#manualSelect2').select2({
-                    data: globalSelect2Data,
-                    placeholder: "-- พิมพ์ค้นหาบริษัท --",
-                    dropdownParent: $('.swal2-popup'),
-                    allowClear: true
-                });
+                $('#companySelect').select2({ data: select2Options, placeholder: "พิมพ์ค้นหาชื่อบริษัท..." });
             },
             preConfirm: () => {
-                const val = $('#manualSelect2').val();
-                if (!val) {
-                    Swal.showValidationMessage('กรุณาเลือกบริษัทก่อนกดยืนยัน');
-                    return false;
-                }
+                const val = $('#companySelect').val();
+                if (!val) { Swal.showValidationMessage('กรุณาเลือกบริษัท'); return false; }
                 return val;
             }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const selectedItem = globalData[parseInt(result.value)];
-                runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly);
-            } else {
-                document.getElementById("submitBtn").disabled = false;
-            }
+        }).then(result => {
+            if (result.isConfirmed) evaluateCompany(dbData[result.value], ocrText);
+            else document.getElementById("submitBtn").disabled = false;
         });
     }
 
-    function runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly) {
-        const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
-        const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
-        const addressToMatch = selectedItem["Address"] ? selectedItem["Address"].toString() : "";
+    // --- ตรวจสอบความถูกต้องและแสดงผล ---
+    function evaluateCompany(company, ocrText) {
+        // หาจำนวนเงินสูงสุด
+        const amounts = ocrText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g) || [];
+        const maxAmount = amounts.reduce((max, val) => Math.max(max, parseFloat(val.replace(/,/g, ''))), 0);
 
-        const moneyMatches = detectedText.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b|\b\d+\.\d{2}\b/g);
-        let maxAmount = 0;
-        if (moneyMatches) {
-            moneyMatches.forEach(m => {
-                const val = parseFloat(m.replace(/,/g, ''));
-                if (val > maxAmount) { maxAmount = val; }
-            });
+        // Normalize Text สำหรับเทียบ (ลบช่องว่างทิ้งทั้งหมดเพื่อให้แม่นยำขึ้นเวลา OCR เว้นวรรคผิด)
+        const cleanOcr = ocrText.replace(/\s+/g, '');
+        const dbName = (company["CompanyName"] || "").replace(/\s+/g, '');
+        const dbAddress = (company["Address"] || "").replace(/\s+/g, '');
+
+        let isNameMatch = dbName && cleanOcr.includes(dbName);
+        let isAddressMatch = dbAddress && cleanOcr.includes(dbAddress);
+
+        // สร้าง HTML สำหรับแสดงผล
+        let resultHtml = `
+            <div class="custom-alert-box" style="text-align: center;">
+                <b style="color: var(--primary); font-size: 16px;">${company["CompanyName"]}</b>
+            </div>`;
+
+        if (!isNameMatch || !isAddressMatch) {
+            resultHtml += `<div class="custom-alert-box">
+                <b style="color:#e74c3c;">⚠️ พบจุดที่อาจไม่ตรงกับระบบ:</b><br><br>
+                ${!isNameMatch ? `<b>ชื่อบริษัท:</b> ตรวจไม่พบชื่อที่ตรงกันเป๊ะในใบเสร็จ<br>` : ''}
+                ${!isAddressMatch ? `<b>ที่อยู่:</b> ตรวจไม่พบที่อยู่ที่ตรงกันเป๊ะในใบเสร็จ` : ''}
+                <div style="font-size:12px; color:#7f8c8d; margin-top:10px;">*รูปอาจไม่ชัด หรือ OCR อ่านเว้นวรรคผิดเพี้ยน</div>
+            </div>`;
         }
 
-        let amountWarningHtml = '';
         if (maxAmount >= 1070) {
-            amountWarningHtml = `
-            <div style="margin-top: 12px; background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; border: 1px solid #ffeeba; text-align: center; line-height: 1.4;">
-                <strong style="font-size:14px; color:#d35400;">⚠️ ยอดเงินในบิล: ${maxAmount.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</strong>
-                <div style="font-size: 12px; margin-top: 4px; color: #666;">
-                    (ยอดรวมตั้งแต่ 1,070 บาทขึ้นไป)<br>
-                    <span style="font-weight:600; color:#d35400;">📌 ต้องออกใบหัก ณ ที่จ่าย</span>
-                </div>
+            resultHtml += `<div class="custom-alert-box" style="background:#fff3cd; border-color:#ffeeba;">
+                <b style="color:#d35400;">💰 ยอดเงินสูงสุดที่พบ: ${maxAmount.toLocaleString()} บาท</b><br>
+                <span style="font-size: 13px;">(ยอดเกิน 1,070 บาท กรุณาตรวจสอบการหัก ณ ที่จ่าย)</span>
             </div>`;
         }
 
-        function findBestSnippet(dbText, ocrText) {
-            if (!dbText) return "";
-            const ocrLines = ocrText.split('\n');
-            let bestSnippet = "";
-            let maxScore = -1;
-            const targetWords = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+        const isPerfectMatch = isNameMatch && isAddressMatch;
 
-            for (let i = 0; i < ocrLines.length; i++) {
-                let l1 = ocrLines[i];
-                let l2 = l1 + (ocrLines[i+1] ? " " + ocrLines[i+1] : "");
-                let l3 = l2 + (ocrLines[i+2] ? " " + ocrLines[i+2] : "");
-                
-                [l1, l2, l3].forEach(snippet => {
-                    let snippetNorm = snippet.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
-                    let score = 0;
-                    targetWords.forEach(tw => {
-                        if (snippetNorm.includes(tw)) score++;
-                    });
-                    let finalScore = score - (snippet.length * 0.005);
-                    if (finalScore > maxScore && score > 0) {
-                        maxScore = finalScore;
-                        bestSnippet = snippet;
-                    }
-                });
-            }
-            return bestSnippet.replace(/\s+/g, ' ').trim();
-        }
-
-        function analyzeMatch(dbText, ocrText) {
-            if (!dbText) return { score: 1.0, bestSnippet: "" };
-            
-            let matchCount = 0;
-            let hasNumberMismatch = false;
-
-            const dbNumNormalized = dbText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
-            const dbNumbers = dbNumNormalized.match(/\d+/g) || [];
-            
-            const ocrNumNormalized = ocrText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
-            const ocrNumbers = ocrNumNormalized.match(/\d+/g) || [];
-            
-            dbNumbers.forEach(num => {
-                if (ocrNumbers.includes(num)) {
-                    matchCount++;
-                } else {
-                    hasNumberMismatch = true;
-                }
-            });
-
-            const dbLettersNorm = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, ' ');
-            const dbWords = dbLettersNorm.split(/\s+/).filter(w => w.length > 1);
-            
-            const ocrLettersNorm = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, '');
-            
-            dbWords.forEach(w => {
-                if (ocrLettersNorm.includes(w)) {
-                    matchCount++;
-                }
-            });
-
-            let totalItems = dbNumbers.length + dbWords.length;
-            let finalScore = totalItems === 0 ? 1.0 : matchCount / totalItems;
-
-            if (hasNumberMismatch && finalScore >= 0.8) {
-                finalScore = 0.79;
-            }
-
-            return { score: finalScore, bestSnippet: findBestSnippet(dbText, ocrText) };
-        }
-
-        let taxIdPassed = true;
-        if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
-            taxIdPassed = false;
-        }
-
-        let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText);
-        let addressAnalysis = analyzeMatch(addressToMatch, detectedText);
-        let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
-
-        let missingDetailsHtml = '';
-        
-        // ใช้ Flexbox จัดการ Layout เพื่อไม่ให้หัวข้อตกบรรทัด
-        if (companyAnalysis.score < 1.0 && companyNameToMatch) {
-            let sysHi = highlightDiff(companyNameToMatch, companyAnalysis.bestSnippet);
-            let aiHi = highlightDiff(companyAnalysis.bestSnippet, companyNameToMatch);
-            missingDetailsHtml += `
-                <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ccc;">
-                    <strong style="color: #2c3e50; font-size:13px;">🏢 ชื่อบริษัท:</strong>
-                    <div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;">
-                        <div style="display: flex; margin-bottom: 4px;">
-                            <span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ที่ถูกต้อง:</span>
-                            <span>${sysHi}</span>
-                        </div>
-                        <div style="display: flex;">
-                            <span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ใบเสร็จ:</span>
-                            <span>${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความ</span>'}</span>
-                        </div>
-                    </div>
-                </div>`;
-        }
-        
-        if (addressAnalysis.score < 1.0 && addressToMatch) {
-            let sysHi = highlightDiff(addressToMatch, addressAnalysis.bestSnippet);
-            let aiHi = highlightDiff(addressAnalysis.bestSnippet, addressToMatch);
-            missingDetailsHtml += `
-                <div>
-                    <strong style="color: #2c3e50; font-size:13px;">📍 ที่อยู่:</strong>
-                    <div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;">
-                        <div style="display: flex; margin-bottom: 4px;">
-                            <span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ที่ถูกต้อง:</span>
-                            <span>${sysHi}</span>
-                        </div>
-                        <div style="display: flex;">
-                            <span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ใบเสร็จ:</span>
-                            <span>${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความ</span>'}</span>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        let missingWordsHtml = '';
-        if (missingDetailsHtml !== '') {
-            missingWordsHtml = `<div style="margin-top: 12px; padding: 10px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left;">${missingDetailsHtml}</div>`;
-        }
-
-        let companyHeaderHtml = `<div style="background-color:#eef2ff; padding:8px 10px; border-radius:8px; margin-bottom:12px; text-align:center; border:1px solid #c7d2fe;">
-            <span style="font-size:12px; color:#4361ee;">กำลังตรวจสอบบัญชี</span><br>
-            <strong style="font-size:13px; color:#1e293b; display:block; margin-top:4px; word-break:break-word;">${companyNameToMatch}</strong>
-        </div>`;
-
-        if (!taxIdPassed) {
-            let taxErrorHtml = `<div style="margin-top: 12px; background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 12px; line-height: 1.4;">
-                <strong style="display:block; margin-bottom:4px;">❌ เลขประจำตัวผู้เสียภาษีไม่ตรง</strong>
-                ระบบหาเลข <span style="font-weight:bold;">${taxIdToMatch}</span> ไม่พบบนเอกสาร
-            </div>`;
-            Swal.fire({
-                icon: 'error',
-                title: 'ข้อมูลไม่ตรงกัน!',
-                html: companyHeaderHtml + '<div style="font-size: 13px; color:#c0392b; font-weight:500;">ตรวจไม่พบเลขผู้เสียภาษี หรือรูปไม่ชัดเจน</div>' + taxErrorHtml + amountWarningHtml,
-                confirmButtonColor: '#e74c3c',
-                confirmButtonText: 'ตรวจสอบด้วยตนเอง'
-            }).then(() => { resetForm(); });
-
-        } else if (lowestScore === 1.0) {
-            Swal.fire({
-                icon: 'success',
-                title: 'ข้อมูลถูกต้อง 100%',
-                html: companyHeaderHtml + '<div style="font-size: 13px; color:#27ae60; font-weight:600;">✅ ข้อมูลบนเอกสารตรงกับระบบทุกประการ</div>' + amountWarningHtml,
-                confirmButtonColor: '#2ecc71',
-                confirmButtonText: 'ตกลง'
-            }).then(() => { resetForm(); });
-
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'ข้อมูลไม่ตรง / รูปไม่ชัด',
-                html: companyHeaderHtml + `<div style="font-size: 13px; color:#c0392b; font-weight:500;">❌ ข้อมูลบางส่วนไม่ตรง หรือ AI อ่านได้ไม่ครบถ้วน</div>${missingWordsHtml}` + amountWarningHtml,
-                confirmButtonColor: '#e74c3c',
-                confirmButtonText: 'ตรวจสอบด้วยตนเอง'
-            }).then(() => { resetForm(); });
-        }
-    }
-
-    function resetForm() {
-        document.getElementById('cameraInput').value = "";
-        document.getElementById('galleryInput').value = "";
-        document.getElementById('previewContainer').innerHTML = "";
-        currentBase64Array = [];
-        document.getElementById("submitBtn").disabled = true;
+        Swal.fire({
+            icon: isPerfectMatch ? 'success' : 'warning',
+            title: isPerfectMatch ? 'ข้อมูลถูกต้อง!' : 'โปรดตรวจสอบอีกครั้ง',
+            html: resultHtml,
+            confirmButtonText: 'เสร็จสิ้น',
+            confirmButtonColor: isPerfectMatch ? '#2ecc71' : '#e67e22'
+        }).then(() => {
+            // Reset ฟอร์ม
+            document.getElementById('cameraInput').value = "";
+            document.getElementById('galleryInput').value = "";
+            document.getElementById('previewContainer').innerHTML = "";
+            imageBase64List = [];
+            document.getElementById("submitBtn").disabled = true;
+        });
     }
 </script>
 
