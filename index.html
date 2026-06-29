@@ -40,7 +40,6 @@
         .header h2 { color: var(--primary); margin: 0 0 2px 0; font-size: 20px; font-weight: 600; }
         .header p { color: var(--text-muted); margin: 0; font-size: 13px; }
 
-        /* จัดระเบียบ CSS ของป้ายเตือน */
         .warning-note {
             background-color: #f8f9fc; color: #2c3e50; padding: 10px; border-radius: 10px;
             text-align: left; margin-bottom: 15px; border: 1px solid #dcdde1;
@@ -51,7 +50,6 @@
         .warning-box strong { color: #d35400; font-size: 12px; }
         .warning-box ul { margin: 2px 0 0 0; padding-left: 20px; font-weight: 500; color: #c0392b; font-size: 12px; }
 
-        /* จัดระเบียบ UI ส่วนอัปโหลด */
         .upload-container {
             border: 2px dashed #bcccff; padding: 12px 10px; border-radius: 12px; 
             background-color: #f4f7ff; margin-bottom: 15px; text-align: center;
@@ -80,14 +78,12 @@
         }
         button.submit-btn:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
-        /* ปรับแต่ง Select2 */
         .select2-container { width: 100% !important; }
         .select2-container--default .select2-selection--single { height: 45px; border-radius: 10px; border: 2px solid var(--border-light); display: flex; align-items: center; }
         .select2-container--default.select2-container--open .select2-selection--single { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1); }
         .select2-container--default .select2-selection--single .select2-selection__rendered { padding-left: 14px; font-size: 14px; }
         .select2-dropdown { font-family: 'Kanit', sans-serif; border: 2px solid var(--primary); border-radius: 10px; }
 
-        /* ปรับแต่ง SweetAlert */
         .swal2-popup { font-family: 'Kanit', sans-serif; padding: 1.2em 1em !important; width: 95% !important; max-width: 500px !important; }
         .swal2-title { font-size: 18px !important; line-height: 1.4 !important; }
         .branch-select-btn { background-color:#4361ee; display:block; margin:8px auto; width:95%; text-align:left; padding:8px 10px; font-size:12px; border-radius:8px; color:white; border:none; cursor:pointer; }
@@ -206,24 +202,6 @@
         }
     }
 
-    // --- ฟังก์ชัน Highlight สีแบบเดิมของคุณ ---
-    function highlightDiff(sourceText, compareText) {
-        if (!sourceText) return "";
-        if (!compareText) return `<span style="color: #e74c3c; font-weight: bold;">${sourceText}</span>`;
-        let sourceWords = sourceText.split(/\s+/);
-        let cleanTextB = compareText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-        let result = [];
-        sourceWords.forEach(w => {
-            let cleanW = w.toLowerCase().replace(/[^a-z0-9ก-๙]/g, '');
-            if (cleanW.length > 0 && !cleanTextB.includes(cleanW)) {
-                result.push(`<span style="color: #e74c3c; font-weight: bold;">${w}</span>`);
-            } else {
-                result.push(`<span style="color: #555;">${w}</span>`);
-            }
-        });
-        return result.join(' ');
-    }
-
     async function processDocument() {
         const submitBtn = document.getElementById("submitBtn");
         submitBtn.disabled = true;
@@ -271,7 +249,6 @@
             } else if (matchingIndexes.length === 1) {
                 runEvaluation(globalData[matchingIndexes[0]], detectedText, cleanDetectedTextNumbersOnly);
             } else {
-                // --- ลอจิกการเลือกสาขาแบบเดิม ---
                 let optionsHtml = '';
                 matchingIndexes.forEach(idx => {
                     const comp = globalData[idx];
@@ -296,7 +273,6 @@
                     }
                 }).then((res) => { if (res.isDismissed) submitBtn.disabled = false; });
             }
-
         } catch (error) {
             Swal.fire('ข้อผิดพลาด', 'เชื่อมต่อ AI ล้มเหลว', 'error').then(() => submitBtn.disabled = false);
         }
@@ -324,7 +300,6 @@
         });
     }
 
-    // --- ลอจิก Scoring และดึง Snippet ที่ถูกต้องแบบเดิมของคุณ ---
     function runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly) {
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
@@ -348,81 +323,114 @@
             </div>`;
         }
 
-        function findBestSnippet(dbText, ocrText) {
-            if (!dbText) return "";
-            const ocrLines = ocrText.split('\n');
-            let bestSnippet = ""; let maxScore = -1;
-            const targetWords = dbText.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ').split(/\s+/).filter(w => w.length > 1);
-
-            for (let i = 0; i < ocrLines.length; i++) {
-                let l1 = ocrLines[i]; let l2 = l1 + (ocrLines[i+1] ? " " + ocrLines[i+1] : ""); let l3 = l2 + (ocrLines[i+2] ? " " + ocrLines[i+2] : "");
-                [l1, l2, l3].forEach(snippet => {
-                    let snippetNorm = snippet.toLowerCase().replace(/[^a-z0-9ก-๙]/g, ' ');
-                    let score = 0;
-                    targetWords.forEach(tw => { if (snippetNorm.includes(tw)) score++; });
-                    let finalScore = score - (snippet.length * 0.005);
-                    if (finalScore > maxScore && score > 0) { maxScore = finalScore; bestSnippet = snippet; }
-                });
-            }
-            return bestSnippet.replace(/\s+/g, ' ').trim();
+        function normalizeForMatch(text) {
+            if (!text) return "";
+            let t = text.toUpperCase();
+            t = t.replace(/\bLTD\.?\b/g, 'LIMITED');
+            t = t.replace(/\bCO\.,?LTD\.?\b/g, 'COMPANY LIMITED');
+            t = t.replace(/\bCO\.,?\b/g, 'COMPANY');
+            t = t.replace(/\(HEAD OFFICE\)/g, '');
+            t = t.replace(/สำนักงานใหญ่/g, '');
+            t = t.replace(/ชื่อลูกค้า/g, '');
+            t = t.replace(/CUSTOMER NAME/g, '');
+            t = t.replace(/ที่อยู่/g, '');
+            t = t.replace(/REFER/g, '');
+            return t;
         }
 
-        function analyzeMatch(dbText, ocrText) {
+        function analyzeMatch(dbText, fullOcrText) {
             if (!dbText) return { score: 1.0, bestSnippet: "" };
-            let matchCount = 0; let hasNumberMismatch = false;
-
-            const dbNumNormalized = dbText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
-            const dbNumbers = dbNumNormalized.match(/\d+/g) || [];
-            const ocrNumNormalized = ocrText.toLowerCase().replace(/o/g, '0').replace(/[il]/g, '1');
-            const ocrNumbers = ocrNumNormalized.match(/\d+/g) || [];
             
-            dbNumbers.forEach(num => {
-                if (ocrNumbers.includes(num)) matchCount++; else hasNumberMismatch = true;
+            const normDB = normalizeForMatch(dbText);
+            const normOCR = normalizeForMatch(fullOcrText).replace(/[^A-Z0-9ก-๙]/g, '');
+            const dbWords = normDB.split(/\s+/).filter(w => w.replace(/[^A-Z0-9ก-๙]/g, '').length > 0);
+            let matchCount = 0;
+
+            dbWords.forEach(w => {
+                let cleanW = w.replace(/[^A-Z0-9ก-๙]/g, '');
+                if (normOCR.includes(cleanW)) {
+                    matchCount++;
+                }
             });
 
-            const dbLettersNorm = dbText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, ' ');
-            const dbWords = dbLettersNorm.split(/\s+/).filter(w => w.length > 1);
-            const ocrLettersNorm = ocrText.toLowerCase().replace(/0/g, 'o').replace(/[1i]/g, 'l').replace(/[^a-zก-๙]/g, '');
+            let finalScore = dbWords.length === 0 ? 1.0 : (matchCount / dbWords.length);
+            const ocrLines = fullOcrText.split('\n');
+            let bestSnippet = ""; 
+            let maxScore = -1;
             
-            dbWords.forEach(w => { if (ocrLettersNorm.includes(w)) matchCount++; });
+            for (let i = 0; i < ocrLines.length; i++) {
+                let l1 = ocrLines[i]; 
+                let l2 = l1 + (ocrLines[i+1] ? " " + ocrLines[i+1] : "");
+                
+                [l1, l2].forEach(snippet => {
+                    let snippetNorm = normalizeForMatch(snippet).replace(/[^A-Z0-9ก-๙]/g, '');
+                    let score = 0;
+                    dbWords.forEach(w => {
+                        let cleanW = w.replace(/[^A-Z0-9ก-๙]/g, '');
+                        if (cleanW && snippetNorm.includes(cleanW)) score++;
+                    });
+                    
+                    let penalty = snippet.length * 0.005;
+                    let currentScore = score - penalty;
+                    
+                    if (currentScore > maxScore && score > 0) { 
+                        maxScore = currentScore; 
+                        bestSnippet = snippet.trim(); 
+                    }
+                });
+            }
 
-            let totalItems = dbNumbers.length + dbWords.length;
-            let finalScore = totalItems === 0 ? 1.0 : matchCount / totalItems;
-            if (hasNumberMismatch && finalScore >= 0.8) finalScore = 0.79;
+            return { score: finalScore, bestSnippet: bestSnippet };
+        }
 
-            return { score: finalScore, bestSnippet: findBestSnippet(dbText, ocrText) };
+        function highlightMissing(sourceText, compareText) {
+            if (!sourceText) return "";
+            if (!compareText) return `<span style="color: #e74c3c; font-weight: bold;">${sourceText}</span>`;
+            
+            let sourceWords = sourceText.split(/\s+/);
+            let normCompare = normalizeForMatch(compareText).replace(/[^A-Z0-9ก-๙]/g, '');
+            let result = [];
+            
+            sourceWords.forEach(w => {
+                let cleanW = normalizeForMatch(w).replace(/[^A-Z0-9ก-๙]/g, '');
+                if (cleanW.length > 0 && !normCompare.includes(cleanW)) {
+                    result.push(`<span style="color: #e74c3c; font-weight: bold;">${w}</span>`);
+                } else {
+                    result.push(`<span style="color: #555;">${w}</span>`);
+                }
+            });
+            return result.join(' ');
         }
 
         let taxIdPassed = true;
-        if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) taxIdPassed = false;
+        if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) {
+            taxIdPassed = false;
+        }
 
         let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText);
         let addressAnalysis = analyzeMatch(addressToMatch, detectedText);
-        let lowestScore = Math.min(companyAnalysis.score, addressAnalysis.score);
-
         let missingDetailsHtml = '';
+
         if (companyAnalysis.score < 1.0 && companyNameToMatch) {
-            let sysHi = highlightDiff(companyNameToMatch, companyAnalysis.bestSnippet);
-            let aiHi = highlightDiff(companyAnalysis.bestSnippet, companyNameToMatch);
+            let sysHi = highlightMissing(companyNameToMatch, companyAnalysis.bestSnippet);
             missingDetailsHtml += `
                 <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ccc;">
                     <strong style="color: #2c3e50; font-size:13px;">🏢 ชื่อบริษัท:</strong>
                     <div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;">
-                        <div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ที่ถูกต้อง:</span><span>${sysHi}</span></div>
-                        <div style="display: flex;"><span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ใบเสร็จ:</span><span>${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความ</span>'}</span></div>
+                        <div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">ฐานข้อมูล:</span><span>${sysHi}</span></div>
+                        <div style="display: flex;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">สิ่งที่อ่านได้:</span><span style="color: #7f8c8d;">${companyAnalysis.bestSnippet || 'ไม่พบข้อความ'}</span></div>
                     </div>
                 </div>`;
         }
         
         if (addressAnalysis.score < 1.0 && addressToMatch) {
-            let sysHi = highlightDiff(addressToMatch, addressAnalysis.bestSnippet);
-            let aiHi = highlightDiff(addressAnalysis.bestSnippet, addressToMatch);
+            let sysHi = highlightMissing(addressToMatch, addressAnalysis.bestSnippet);
             missingDetailsHtml += `
                 <div>
                     <strong style="color: #2c3e50; font-size:13px;">📍 ที่อยู่:</strong>
                     <div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;">
-                        <div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ที่ถูกต้อง:</span><span>${sysHi}</span></div>
-                        <div style="display: flex;"><span style="color: #7f8c8d; min-width: 55px; flex-shrink: 0;">ใบเสร็จ:</span><span>${aiHi || '<span style="color:#e74c3c;">ไม่พบข้อความ</span>'}</span></div>
+                        <div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">ฐานข้อมูล:</span><span>${sysHi}</span></div>
+                        <div style="display: flex;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">สิ่งที่อ่านได้:</span><span style="color: #7f8c8d;">${addressAnalysis.bestSnippet || 'ไม่พบข้อความ'}</span></div>
                     </div>
                 </div>`;
         }
@@ -437,16 +445,16 @@
                 html: companyHeaderHtml + '<div style="font-size: 13px; color:#c0392b; font-weight:500;">ตรวจไม่พบเลขผู้เสียภาษี หรือรูปไม่ชัดเจน</div>' + taxErrorHtml + amountWarningHtml,
                 confirmButtonColor: '#e74c3c', confirmButtonText: 'ตรวจสอบด้วยตนเอง'
             }).then(() => resetForm());
-        } else if (lowestScore === 1.0) {
+        } else if (missingDetailsHtml === '') { 
             Swal.fire({
-                icon: 'success', title: 'ข้อมูลถูกต้อง 100%',
+                icon: 'success', title: 'ข้อมูลถูกต้องเป๊ะ 100%',
                 html: companyHeaderHtml + '<div style="font-size: 13px; color:#27ae60; font-weight:600;">✅ ข้อมูลบนเอกสารตรงกับระบบทุกประการ</div>' + amountWarningHtml,
                 confirmButtonColor: '#2ecc71', confirmButtonText: 'ตกลง'
             }).then(() => resetForm());
         } else {
             Swal.fire({
                 icon: 'error', title: 'ข้อมูลไม่ตรง / รูปไม่ชัด',
-                html: companyHeaderHtml + `<div style="font-size: 13px; color:#c0392b; font-weight:500;">❌ ข้อมูลบางส่วนไม่ตรง หรือ AI อ่านได้ไม่ครบถ้วน</div>${missingWordsHtml}` + amountWarningHtml,
+                html: companyHeaderHtml + `<div style="font-size: 13px; color:#c0392b; font-weight:500;">❌ ข้อมูลเอกสารขาดหาย หรือไม่ตรงกับระบบบัญชี</div>${missingWordsHtml}` + amountWarningHtml,
                 confirmButtonColor: '#e74c3c', confirmButtonText: 'ตรวจสอบด้วยตนเอง'
             }).then(() => resetForm());
         }
