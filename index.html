@@ -12,6 +12,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    
     <style>
         :root {
             --primary: #4361ee; --primary-hover: #3a0ca3;
@@ -22,7 +25,7 @@
         }
 
         body { font-family: 'Kanit', sans-serif; background-color: var(--bg-color); margin: 0; padding: 10px; color: var(--text-main); }
-        .container { max-width: 700px; margin: 0 auto; background: var(--card-bg); padding: 20px 15px; border-radius: 16px; box-shadow: var(--shadow-md); position: relative; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 20px 15px; border-radius: 16px; box-shadow: var(--shadow-md); position: relative; }
         
         .admin-btn-top { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer; color: #a0aec0; }
         .admin-btn-top:hover { color: var(--primary); }
@@ -64,14 +67,20 @@
 
         .disclaimer-text { text-align: center; margin-top: 15px; font-size: 11px; color: #7f8c8d; line-height: 1.4; }
 
+        /* Admin DataTables Style adjustments */
         .admin-table-container { overflow-x: auto; margin-top: 15px; }
-        .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .admin-table th, .admin-table td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
-        .admin-table th { background-color: #f8f9fc; color: var(--primary); white-space: nowrap; }
-        .btn-sm { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; color: white; margin-right: 4px; font-family: inherit;}
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .admin-table th { background-color: #f8f9fc; color: var(--primary); white-space: nowrap; padding: 10px; border-bottom: 2px solid var(--border-light); }
+        .admin-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .dataTables_wrapper .dataTables_filter input { border: 1px solid #ccc; border-radius: 6px; padding: 4px 8px; margin-left: 5px; font-family: 'Kanit', sans-serif; }
+        .dataTables_wrapper .dataTables_length select { border: 1px solid #ccc; border-radius: 6px; padding: 4px; font-family: 'Kanit', sans-serif; }
+        
+        .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; border: none; color: white; margin-right: 4px; font-family: inherit; transition: opacity 0.2s; }
+        .btn-sm:hover { opacity: 0.8; }
         .btn-edit { background-color: #f39c12; }
         .btn-del { background-color: #e74c3c; }
-        .btn-add-new { background-color: #2ecc71; color: white; padding: 10px; border-radius: 8px; border: none; cursor: pointer; width: 100%; font-family: inherit; font-size: 14px; margin-bottom: 10px; }
+        .btn-add-new { background-color: #2ecc71; color: white; padding: 10px; border-radius: 8px; border: none; cursor: pointer; width: 100%; font-family: inherit; font-size: 14px; margin-bottom: 10px; transition: background-color 0.2s;}
+        .btn-add-new:hover { background-color: #27ae60; }
 
         @media (max-width: 480px) { .container { padding: 15px 10px; } .header h2 { font-size: 18px; } }
     </style>
@@ -137,11 +146,11 @@
         </div>
         
         <button class="btn-add-new" onclick="openAddModal()">+ เพิ่มบริษัทใหม่</button>
-        <button class="action-btn" style="width:100%; flex-direction:row; padding:10px;" onclick="closeAdmin()">กลับหน้าสแกนเอกสาร</button>
+        <button class="action-btn" style="width:100%; flex-direction:row; padding:10px; margin-bottom: 15px;" onclick="closeAdmin()">กลับหน้าสแกนเอกสาร</button>
         
         <div class="admin-table-container">
-            <table class="admin-table">
-                <thead><tr><th>ชื่อบริษัท</th><th>เลขผู้เสียภาษี</th><th>จัดการ</th></tr></thead>
+            <table id="dataTable" class="admin-table display">
+                <thead><tr><th>ชื่อบริษัท</th><th>เลขผู้เสียภาษี</th><th style="text-align: center;">จัดการ</th></tr></thead>
                 <tbody id="adminTableBody"></tbody>
             </table>
         </div>
@@ -154,6 +163,7 @@
     let globalData = [];
     let globalSelect2Data = [];
     let currentBase64Array = [];
+    let myDataTable = null; // ตัวแปรเก็บ DataTables
 
     window.onload = function() { fetchDataFromSheet(); };
 
@@ -211,6 +221,11 @@
     }
 
     function renderAdminTable() {
+        // หากเคยสร้าง DataTables ไว้แล้ว ให้ทำลายทิ้งก่อนเพื่อโหลดข้อมูลใหม่
+        if (myDataTable) {
+            myDataTable.destroy();
+        }
+
         const tbody = document.getElementById('adminTableBody');
         tbody.innerHTML = '';
         globalData.forEach((item, index) => {
@@ -218,12 +233,34 @@
             tr.innerHTML = `
                 <td>${item.CompanyName || '-'}</td>
                 <td>${item.TaxID || '-'}</td>
-                <td style="white-space: nowrap;">
+                <td style="white-space: nowrap; text-align: center;">
                     <button class="btn-sm btn-edit" onclick="openEditModal(${index})">แก้ไข</button>
                     <button class="btn-sm btn-del" onclick="confirmDelete(${index})">ลบ</button>
                 </td>
             `;
             tbody.appendChild(tr);
+        });
+
+        // เปิดใช้งาน DataTables
+        myDataTable = $('#dataTable').DataTable({
+            language: {
+                search: "🔍 ค้นหา:",
+                lengthMenu: "แสดง _MENU_ รายการ",
+                info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                infoEmpty: "ไม่พบข้อมูล",
+                infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+                zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+                paginate: {
+                    first: "หน้าแรก",
+                    last: "หน้าสุดท้าย",
+                    next: "ถัดไป",
+                    previous: "ก่อนหน้า"
+                }
+            },
+            pageLength: 10,
+            ordering: true, // เปิดการเรียงลำดับ A-Z, ก-ฮ
+            order: [[0, "asc"]], // เรียงตามคอลัมน์แรก (ชื่อบริษัท) เริ่มต้น
+            responsive: true
         });
     }
 
