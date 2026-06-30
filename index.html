@@ -163,7 +163,7 @@
     let globalData = [];
     let globalSelect2Data = [];
     let currentBase64Array = [];
-    let myDataTable = null; // ตัวแปรเก็บ DataTables
+    let myDataTable = null;
 
     window.onload = function() { fetchDataFromSheet(); };
 
@@ -184,7 +184,6 @@
         }).catch(err => Swal.fire('การเชื่อมต่อล้มเหลว', 'โปรดตรวจสอบอินเทอร์เน็ต', 'error'));
     }
 
-    // เพิ่ม Parameter: showLoading เพื่อเลือกได้ว่าจะให้เปิด Popup Loading หรือไม่
     async function sendAdminRequest(action, payload, showLoading = true) {
         if (showLoading) {
             Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -193,14 +192,10 @@
             const reqData = { action: action, ...payload };
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(reqData) });
             const result = await res.json();
-            if (showLoading) {
-                Swal.close(); // ปิด popup โหลดเมื่อคำสั่งถูกทำงานเสร็จสมบูรณ์
-            }
+            if (showLoading) Swal.close();
             return result;
         } catch (e) {
-            if (showLoading) {
-                Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์', 'error');
-            }
+            if (showLoading) Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์', 'error');
             throw e;
         }
     }
@@ -228,11 +223,7 @@
     }
 
     function renderAdminTable() {
-        // หากเคยสร้าง DataTables ไว้แล้ว ให้ทำลายทิ้งก่อนเพื่อโหลดข้อมูลใหม่
-        if (myDataTable) {
-            myDataTable.destroy();
-        }
-
+        if (myDataTable) myDataTable.destroy();
         const tbody = document.getElementById('adminTableBody');
         tbody.innerHTML = '';
         globalData.forEach((item, index) => {
@@ -248,26 +239,13 @@
             tbody.appendChild(tr);
         });
 
-        // เปิดใช้งาน DataTables
         myDataTable = $('#dataTable').DataTable({
             language: {
-                search: "🔍 ค้นหา:",
-                lengthMenu: "แสดง _MENU_ รายการ",
-                info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-                infoEmpty: "ไม่พบข้อมูล",
-                infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
-                zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
-                paginate: {
-                    first: "หน้าแรก",
-                    last: "หน้าสุดท้าย",
-                    next: "ถัดไป",
-                    previous: "ก่อนหน้า"
-                }
+                search: "🔍 ค้นหา:", lengthMenu: "แสดง _MENU_ รายการ", info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                infoEmpty: "ไม่พบข้อมูล", infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)", zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+                paginate: { first: "หน้าแรก", last: "หน้าสุดท้าย", next: "ถัดไป", previous: "ก่อนหน้า" }
             },
-            pageLength: 10,
-            ordering: true, // เปิดการเรียงลำดับ A-Z, ก-ฮ
-            order: [[0, "asc"]], // เรียงตามคอลัมน์แรก (ชื่อบริษัท) เริ่มต้น
-            responsive: true
+            pageLength: 10, ordering: true, order: [[0, "asc"]], responsive: true
         });
     }
 
@@ -280,13 +258,7 @@
                 <input id="swal-tax" class="swal2-input" placeholder="เลขผู้เสียภาษี (TaxID)" style="font-size:14px;">
             `,
             showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก',
-            preConfirm: () => {
-                return {
-                    CompanyName: document.getElementById('swal-comp').value,
-                    Address: document.getElementById('swal-addr').value,
-                    TaxID: document.getElementById('swal-tax').value
-                }
-            }
+            preConfirm: () => ({ CompanyName: document.getElementById('swal-comp').value, Address: document.getElementById('swal-addr').value, TaxID: document.getElementById('swal-tax').value })
         }).then(async (result) => {
             if (result.isConfirmed && result.value.CompanyName) {
                 await sendAdminRequest('add', { rowData: result.value });
@@ -305,13 +277,7 @@
                 <input id="swal-tax" class="swal2-input" value="${item.TaxID || ''}" style="font-size:14px;">
             `,
             showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก',
-            preConfirm: () => {
-                return {
-                    CompanyName: document.getElementById('swal-comp').value,
-                    Address: document.getElementById('swal-addr').value,
-                    TaxID: document.getElementById('swal-tax').value
-                }
-            }
+            preConfirm: () => ({ CompanyName: document.getElementById('swal-comp').value, Address: document.getElementById('swal-addr').value, TaxID: document.getElementById('swal-tax').value })
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await sendAdminRequest('edit', { rowIndex: item._rowIndex, rowData: result.value });
@@ -334,7 +300,6 @@
 
     function checkSubmitButton() { document.getElementById("submitBtn").disabled = currentBase64Array.length === 0; }
     
-    // บีบอัดรูปก่อนส่ง
     function compressImage(file, callback) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -348,7 +313,7 @@
                 canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/jpeg', 0.7)); // Quality 70%
+                callback(canvas.toDataURL('image/jpeg', 0.7));
             };
             img.src = e.target.result;
         };
@@ -364,9 +329,7 @@
             Array.from(files).forEach(file => {
                 compressImage(file, (dataUrl) => {
                     const img = document.createElement('img'); img.src = dataUrl; img.className = 'preview-img';
-                    previewContainer.appendChild(img); 
-                    currentBase64Array.push(dataUrl.split(',')[1]); 
-                    checkSubmitButton();
+                    previewContainer.appendChild(img); currentBase64Array.push(dataUrl.split(',')[1]); checkSubmitButton();
                 });
             });
         } else { checkSubmitButton(); }
@@ -374,16 +337,11 @@
 
     async function processDocument() {
         const submitBtn = document.getElementById("submitBtn"); submitBtn.disabled = true;
-        
         try {
-            // 1. ส่งรูปไป API หลังบ้าน ให้อ่าน Text และเซฟรูป
             const res = await sendAdminRequest("processImage", { images: currentBase64Array });
-            if (res.status === "error") {
-                Swal.fire('ข้อผิดพลาด AI', res.message, 'error'); submitBtn.disabled = false; return;
-            }
+            if (res.status === "error") { Swal.fire('ข้อผิดพลาด AI', res.message, 'error'); submitBtn.disabled = false; return; }
 
-            const detectedText = res.detectedText;
-            const savedImageUrls = res.imageUrls;
+            const detectedText = res.detectedText; const savedImageUrls = res.imageUrls;
             const cleanDetectedTextNumbersOnly = detectedText.replace(/\D/g, '');
             let matchingIndexes = [];
             
@@ -411,8 +369,7 @@
                     title: 'พบข้อมูลหลายสาขา', html: `<div style="font-size:13px;">กรุณาเลือกสาขาที่ถูกต้อง:</div><div style="margin-top:8px;">${optionsHtml}</div>`,
                     showConfirmButton: false, showCancelButton: true, cancelButtonText: 'ยกเลิก',
                     didOpen: () => {
-                        const buttons = Swal.getHtmlContainer().querySelectorAll('.branch-select-btn');
-                        buttons.forEach(btn => {
+                        Swal.getHtmlContainer().querySelectorAll('.branch-select-btn').forEach(btn => {
                             btn.addEventListener('click', function() { Swal.close(); runEvaluation(globalData[parseInt(this.getAttribute('data-idx'))], detectedText, cleanDetectedTextNumbersOnly, savedImageUrls); });
                         });
                     }
@@ -432,6 +389,32 @@
         });
     }
 
+    // --- ฟังก์ชันสำหรับดึงคำที่หายไปออกมาเป็น Text ---
+    function getMissingWordsText(sourceText, compareText) {
+        if (!sourceText) return "";
+        if (!compareText) return sourceText;
+        let tokens = sourceText.match(/([^\s,]+)|([\s,]+)/g) || [];
+        let normCompare = normalizeForMatch(compareText).replace(/[^A-Z0-9ก-๙]/g, '');
+        let ignoreList = ["HEAD", "OFFICE", "สำนักงานใหญ่", "CUSTOMER", "NAME"];
+        let result = [];
+        tokens.forEach(token => {
+            if (!/^[\s,]+$/.test(token)) {
+                let upToken = token.toUpperCase().replace(/[^A-Zก-๙]/g, '');
+                let cleanW = normalizeForMatch(token).replace(/[^A-Z0-9ก-๙]/g, '');
+                if (!ignoreList.includes(upToken) && cleanW.length > 0 && !normCompare.includes(cleanW)) {
+                    result.push(token);
+                }
+            }
+        });
+        return result.join(' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function normalizeForMatch(text) {
+        if (!text) return ""; let t = text.toUpperCase();
+        t = t.replace(/\(?HEAD\s*OFFICE\)?/g, ''); t = t.replace(/สำนักงานใหญ่/g, ''); t = t.replace(/ชื่อลูกค้า/g, ''); t = t.replace(/CUSTOMER\s*NAME/g, ''); t = t.replace(/ที่อยู่/g, ''); t = t.replace(/REFER/g, ''); t = t.replace(/\bLTD\b\.?/g, 'LIMITED'); t = t.replace(/\bCO\b\.?,?\s*\bLTD\b\.?/g, 'COMPANY LIMITED'); t = t.replace(/\bCO\b\.?,?/g, 'COMPANY'); t = t.replace(/\bRD\b\.?/g, 'ROAD'); t = t.replace(/\bST\b\.?/g, 'STREET'); t = t.replace(/\bBLDG\b\.?/g, 'BUILDING');
+        return t;
+    }
+
     function runEvaluation(selectedItem, detectedText, cleanDetectedTextNumbersOnly, savedImageUrls) {
         const taxIdToMatch = selectedItem["TaxID"] ? selectedItem["TaxID"].toString().replace(/\D/g,'') : "";
         const companyNameToMatch = selectedItem["CompanyName"] ? selectedItem["CompanyName"].toString() : "";
@@ -441,12 +424,6 @@
         if (moneyMatches) moneyMatches.forEach(m => { const val = parseFloat(m.replace(/,/g, '')); if (val > maxAmount) maxAmount = val; });
         let amountWarningHtml = '';
         if (maxAmount >= 1070) amountWarningHtml = `<div style="margin-top: 12px; background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; border: 1px solid #ffeeba; text-align: center; line-height: 1.4;"><strong style="font-size:14px; color:#d35400;">⚠️ ยอดเงินในบิล: ${maxAmount.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</strong><div style="font-size: 12px; margin-top: 4px; color: #666;">(ยอดรวมตั้งแต่ 1,070 บาทขึ้นไป)<br><span style="font-weight:600; color:#d35400;">📌 โปรดสอบถามเจ้าของงานเรื่องการทำใบหัก ณ ที่จ่าย</span></div></div>`;
-        
-        function normalizeForMatch(text) {
-            if (!text) return ""; let t = text.toUpperCase();
-            t = t.replace(/\(?HEAD\s*OFFICE\)?/g, ''); t = t.replace(/สำนักงานใหญ่/g, ''); t = t.replace(/ชื่อลูกค้า/g, ''); t = t.replace(/CUSTOMER\s*NAME/g, ''); t = t.replace(/ที่อยู่/g, ''); t = t.replace(/REFER/g, ''); t = t.replace(/\bLTD\b\.?/g, 'LIMITED'); t = t.replace(/\bCO\b\.?,?\s*\bLTD\b\.?/g, 'COMPANY LIMITED'); t = t.replace(/\bCO\b\.?,?/g, 'COMPANY'); t = t.replace(/\bRD\b\.?/g, 'ROAD'); t = t.replace(/\bST\b\.?/g, 'STREET'); t = t.replace(/\bBLDG\b\.?/g, 'BUILDING');
-            return t;
-        }
 
         function analyzeMatch(dbText, fullOcrText) {
             if (!dbText) return { score: 1.0, bestSnippet: "" };
@@ -481,10 +458,24 @@
         }
 
         let taxIdPassed = true; if (taxIdToMatch && !cleanDetectedTextNumbersOnly.includes(taxIdToMatch)) taxIdPassed = false;
-        let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText); let addressAnalysis = analyzeMatch(addressToMatch, detectedText); let missingDetailsHtml = '';
+        let companyAnalysis = analyzeMatch(companyNameToMatch, detectedText); let addressAnalysis = analyzeMatch(addressToMatch, detectedText); 
+        
+        let missingDetailsHtml = '';
+        let missingTextDetails = []; // เก็บข้อความธรรมดาเตรียมส่งเข้า Log
 
-        if (companyAnalysis.score < 1.0 && companyNameToMatch) missingDetailsHtml += `<div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ccc;"><strong style="color: #2c3e50; font-size:13px;">🏢 ชื่อบริษัท:</strong><div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;"><div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">ฐานข้อมูล:</span><span>${highlightMissing(companyNameToMatch, companyAnalysis.bestSnippet)}</span></div><div style="display: flex;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">สิ่งที่อ่านได้:</span><span style="color: #7f8c8d;">${companyAnalysis.bestSnippet || 'ไม่พบข้อความ'}</span></div></div></div>`;
-        if (addressAnalysis.score < 1.0 && addressToMatch) missingDetailsHtml += `<div><strong style="color: #2c3e50; font-size:13px;">📍 ที่อยู่:</strong><div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;"><div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">ฐานข้อมูล:</span><span>${highlightMissing(addressToMatch, addressAnalysis.bestSnippet)}</span></div><div style="display: flex;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">สิ่งที่อ่านได้:</span><span style="color: #7f8c8d;">${addressAnalysis.bestSnippet || 'ไม่พบข้อความ'}</span></div></div></div>`;
+        if (companyAnalysis.score < 1.0 && companyNameToMatch) {
+            let missingComp = getMissingWordsText(companyNameToMatch, companyAnalysis.bestSnippet);
+            if(missingComp) missingTextDetails.push(`ชื่อบริษัทขาด: ${missingComp}`);
+            
+            missingDetailsHtml += `<div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ccc;"><strong style="color: #2c3e50; font-size:13px;">🏢 ชื่อบริษัท:</strong><div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;"><div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">ฐานข้อมูล:</span><span>${highlightMissing(companyNameToMatch, companyAnalysis.bestSnippet)}</span></div><div style="display: flex;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">สิ่งที่อ่านได้:</span><span style="color: #7f8c8d;">${companyAnalysis.bestSnippet || 'ไม่พบข้อความ'}</span></div></div></div>`;
+        }
+        
+        if (addressAnalysis.score < 1.0 && addressToMatch) {
+            let missingAddr = getMissingWordsText(addressToMatch, addressAnalysis.bestSnippet);
+            if(missingAddr) missingTextDetails.push(`ที่อยู่ขาด: ${missingAddr}`);
+            
+            missingDetailsHtml += `<div><strong style="color: #2c3e50; font-size:13px;">📍 ที่อยู่:</strong><div style="background: #fff5f5; padding: 8px; border-radius: 6px; margin-top: 6px; font-size: 12px; line-height: 1.4; word-break: break-word;"><div style="display: flex; margin-bottom: 4px;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">ฐานข้อมูล:</span><span>${highlightMissing(addressToMatch, addressAnalysis.bestSnippet)}</span></div><div style="display: flex;"><span style="color: #7f8c8d; min-width: 60px; flex-shrink: 0;">สิ่งที่อ่านได้:</span><span style="color: #7f8c8d;">${addressAnalysis.bestSnippet || 'ไม่พบข้อความ'}</span></div></div></div>`;
+        }
         
         let missingWordsHtml = missingDetailsHtml ? `<div style="margin-top: 12px; padding: 10px; background: #f8f9fa; border: 1px solid #bdc3c7; border-radius: 8px; text-align: left;">${missingDetailsHtml}</div>` : '';
         let companyHeaderHtml = `<div style="background-color:#eef2ff; padding:8px 10px; border-radius:8px; margin-bottom:12px; text-align:center; border:1px solid #c7d2fe;"><span style="font-size:12px; color:#4361ee;">กำลังตรวจสอบบัญชี</span><br><strong style="font-size:13px; color:#1e293b; display:block; margin-top:4px; word-break:break-word;">${companyNameToMatch}</strong></div>`;
@@ -494,17 +485,22 @@
         let finalNote = "";
 
         if (!taxIdPassed) {
-            finalResult = "Failed"; finalNote = "เลขประจำตัวผู้เสียภาษีไม่ตรง";
+            finalResult = "Failed"; 
+            finalNote = `เลขผู้เสียภาษีไม่ตรง (หา ${taxIdToMatch} ไม่พบ)`;
+            if(missingTextDetails.length > 0) finalNote += ` | ${missingTextDetails.join(' | ')}`;
+            
             Swal.fire({ icon: 'error', title: 'ข้อมูลไม่ตรงกัน!', html: companyHeaderHtml + '<div style="font-size: 13px; color:#c0392b; font-weight:500;">ตรวจไม่พบเลขผู้เสียภาษี หรือรูปไม่ชัดเจน</div>' + `<div style="margin-top: 12px; background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; border: 1px solid #f5c6cb; text-align: left; font-size: 12px; line-height: 1.4;"><strong style="display:block; margin-bottom:4px;">❌ เลขประจำตัวผู้เสียภาษีไม่ตรง</strong>ระบบหาเลข <span style="font-weight:bold;">${taxIdToMatch}</span> ไม่พบบนเอกสาร</div>` + amountWarningHtml + popupDisclaimer, confirmButtonColor: '#e74c3c', confirmButtonText: 'ตรวจสอบด้วยตนเอง' }).then(() => resetForm());
         } else if (missingDetailsHtml === '') { 
-            finalResult = "Passed"; finalNote = "ข้อมูลตรงกัน 100%";
+            finalResult = "Passed"; 
+            finalNote = "ข้อมูลตรงกัน 100%";
             Swal.fire({ icon: 'success', title: 'ข้อมูลถูกต้องเป๊ะ 100%', html: companyHeaderHtml + '<div style="font-size: 13px; color:#27ae60; font-weight:600;">✅ ข้อมูลบนเอกสารตรงกับระบบทุกประการ</div>' + amountWarningHtml + popupDisclaimer, confirmButtonColor: '#2ecc71', confirmButtonText: 'ตกลง' }).then(() => resetForm());
         } else {
-            finalResult = "Warning"; finalNote = "ข้อมูลไม่ตรงหรือขาดหาย";
+            finalResult = "Warning"; 
+            finalNote = missingTextDetails.length > 0 ? missingTextDetails.join(' | ') : "ข้อมูลไม่ตรงหรือขาดหาย";
             Swal.fire({ icon: 'error', title: 'ข้อมูลไม่ตรง / รูปไม่ชัด', html: companyHeaderHtml + `<div style="font-size: 13px; color:#c0392b; font-weight:500;">❌ ข้อมูลเอกสารขาดหาย หรือไม่ตรงกับระบบบัญชี</div>${missingWordsHtml}` + amountWarningHtml + popupDisclaimer, confirmButtonColor: '#e74c3c', confirmButtonText: 'ตรวจสอบด้วยตนเอง' }).then(() => resetForm());
         }
 
-        // บันทึกลง Sheet Log ทันทีที่ประเมินเสร็จแบบ Background (ส่งพารามิเตอร์ false เพื่อไม่ให้เปิดหน้าต่างโหลด)
+        // ส่งข้อความความแตกต่างที่เจอบันทึกลง Log
         sendAdminRequest("saveLog", {
             companyName: companyNameToMatch, taxId: taxIdToMatch, maxAmount: maxAmount, result: finalResult, imageUrls: savedImageUrls, note: finalNote
         }, false).catch(e => console.error("Log error", e));
