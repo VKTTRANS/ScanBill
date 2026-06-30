@@ -184,15 +184,23 @@
         }).catch(err => Swal.fire('การเชื่อมต่อล้มเหลว', 'โปรดตรวจสอบอินเทอร์เน็ต', 'error'));
     }
 
-    async function sendAdminRequest(action, payload) {
-        Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    // เพิ่ม Parameter: showLoading เพื่อเลือกได้ว่าจะให้เปิด Popup Loading หรือไม่
+    async function sendAdminRequest(action, payload, showLoading = true) {
+        if (showLoading) {
+            Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        }
         try {
             const reqData = { action: action, ...payload };
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(reqData) });
             const result = await res.json();
+            if (showLoading) {
+                Swal.close(); // ปิด popup โหลดเมื่อคำสั่งถูกทำงานเสร็จสมบูรณ์
+            }
             return result;
         } catch (e) {
-            Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์', 'error');
+            if (showLoading) {
+                Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์', 'error');
+            }
             throw e;
         }
     }
@@ -208,7 +216,6 @@
                     document.getElementById('mainScannerView').style.display = 'none';
                     document.getElementById('adminPanelView').style.display = 'block';
                     document.querySelector('.admin-btn-top').style.display = 'none';
-                    Swal.close();
                 } else { Swal.fire('รหัสผ่านผิด', '', 'error'); }
             }
         });
@@ -497,10 +504,10 @@
             Swal.fire({ icon: 'error', title: 'ข้อมูลไม่ตรง / รูปไม่ชัด', html: companyHeaderHtml + `<div style="font-size: 13px; color:#c0392b; font-weight:500;">❌ ข้อมูลเอกสารขาดหาย หรือไม่ตรงกับระบบบัญชี</div>${missingWordsHtml}` + amountWarningHtml + popupDisclaimer, confirmButtonColor: '#e74c3c', confirmButtonText: 'ตรวจสอบด้วยตนเอง' }).then(() => resetForm());
         }
 
-        // บันทึกลง Sheet Log ทันทีที่ประเมินเสร็จแบบ Background
+        // บันทึกลง Sheet Log ทันทีที่ประเมินเสร็จแบบ Background (ส่งพารามิเตอร์ false เพื่อไม่ให้เปิดหน้าต่างโหลด)
         sendAdminRequest("saveLog", {
             companyName: companyNameToMatch, taxId: taxIdToMatch, maxAmount: maxAmount, result: finalResult, imageUrls: savedImageUrls, note: finalNote
-        }).catch(e => console.error("Log error", e));
+        }, false).catch(e => console.error("Log error", e));
     }
 
     function resetForm() {
